@@ -13,28 +13,56 @@
     console.log("Workflow loaded:", workflow);
 
     // Websocket connection
-    const address = window.location.hostname + ":" + window.location.port;
-    const ws = new WebSocket(`ws://${address}/ws?client_id=${client_id}`);
-    ws.addEventListener('open', (event) => { console.log("Websocket connection established"); });
+    const server_address = window.location.hostname + ':' + window.location.port;
+    const socket = new WebSocket('ws://' + server_address + '/ws?clientId=' + client_id);
+    socket.addEventListener('open', (event) => { console.log("Websocket connection established"); });
 
     // Websocket message handler
-    ws.addEventListener('message', (event) => {
-        const message = JSON.parse(event.data);
-        console.log("Websocket message received:", message);
-
-        if (message.type === "executed") {
+    socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if (data.type === 'executed') {
+            console.log(data)
             if ('images' in data['data']['output']) {
-                const images = data['data']['output']['images'][0];
-                const filename = images['filename'];
-                const subfolder = images['subfolder'];
+                const image = data['data']['output']['images'][0];
+                const filename = image['filename']
+                const subfolder = image['subfolder']
                 const rand = Math.random();
 
-                generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand
+                generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
             }
+        } else if (data.type === 'executing') {
+            const steps = {
+                '3': {
+                    step: 'KSampler',
+                    progress: 33,
+                },
+                '8': {
+                    step: 'VAE Decode',
+                    progress: 66,
+                },
+                '9': {
+                    step: 'Save Image',
+                    progress: 100,
+                }
+            }
+            const progress = data['data']['node'];
+            if (!progress) {
+                generationProgressBar.innerHTML = `100%`;
+                generationProgressBar.value = stepInfo.progress;
+                return;
+            }
+            const stepInfo = steps[progress]
+            generationProgressBar.value = stepInfo.progress;
+            generationProgressBar.innerHTML = `${stepInfo.progress}%`;
+            generaitonProgressValue.innerHTML = ` ${stepInfo.step} (${stepInfo.progress}%)`;
         }
     });
 
     const generationOutput = document.getElementById("generationOutput");
+    const generationProgressBar = document.getElementById("progressBar");
+    const generaitonProgressValue = document.getElementById("progressValue");
+
 
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
@@ -51,26 +79,60 @@
 
 
     const _prompt = document.getElementById("promptInput");
+    const _checkpoint = document.getElementById("checkpointSelect");
+    const _steps = document.getElementById("stepsInput");
+    const _seedOutput = document.getElementById("seed-output");
+
+    _seedOutput.innerHTML = workflow["3"]["inputs"]["seed"];
+
     let cachedPrompt = _prompt.value;
+    let cachedCheckpoint = _checkpoint.value;
+    let cachedSteps = _steps.value;
     let lastExecutedPrompt = null;
+    let lastExecutedCheckpoint = null;
+    let lastExecutedSteps = null;
 
     async function checkPrompt() {
-        console.log("Checking prompt...");
         const currentPrompt = _prompt.value;
+        const currentCheckpoint = _checkpoint.value;
+        const currentSteps = _steps.value;
         clearTimeout(promptTimeout);
 
-        if (currentPrompt.length < 2 || currentPrompt != cachedPrompt) {
+        if (currentPrompt.length < 4 || currentPrompt != cachedPrompt || currentCheckpoint != cachedCheckpoint || currentSteps != cachedSteps) {
+            if (currentPrompt != cachedPrompt) {
+                console.log("Prompt changed to:", currentPrompt);
+            }
+
+            if (currentCheckpoint != cachedCheckpoint) {
+                console.log("Checkpoint changed to:", currentCheckpoint);
+            }
+
+            if (currentSteps != cachedSteps) {
+                console.log("Steps changed to:", currentSteps);
+            }
+
             cachedPrompt = currentPrompt;
+            cachedCheckpoint = currentCheckpoint;
+            cachedSteps = currentSteps;
             promptTimeout = setTimeout(checkPrompt, 500);
             return;
         }
 
-        workflow["6"]["inputs"]["text"] = currentPrompt.replace(/(\r\n|\n|\r)/gm, " ");
+        // Set prompt
+        workflow["6"]["inputs"]["text"] = cachedPrompt.replace(/(\r\n|\n|\r)/gm, " ");
+        // Set checkpoint
+        workflow["4"]["inputs"]["ckpt_name"] = cachedCheckpoint;
+        // Set steps
+        workflow["3"]["inputs"]["steps"] = cachedSteps;
+
         // workflow["3"]["inputs"]["seed"] = Math.floor(Math.random() * 9999999999);
 
-        if (lastExecutedPrompt !== currentPrompt) {
+        if (lastExecutedPrompt !== currentPrompt || lastExecutedCheckpoint !== currentCheckpoint || lastExecutedSteps !== currentSteps) {
+            console.log("Workflow queued:", workflow);
             await queue_prompt(workflow);
             lastExecutedPrompt = currentPrompt;
+            lastExecutedCheckpoint = currentCheckpoint;
+            lastExecutedSteps = currentSteps;
         }
 
         promptTimeout = setTimeout(checkPrompt, 500);

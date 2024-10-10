@@ -5,18 +5,70 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Bachelor Thesis Test</title>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<link rel="stylesheet" href="thesis/css/styles.css">
 	</head>
 
 	<body>
 		<div class="container">
-			<h1 class="title">First SD Test</h1>
-			<label for="promptInput" class="label">Prompt:</label>
-			<textarea name="prompt" id="promptInput" class="textarea" placeholder="Input your prompt..."></textarea>
-			<label for="generationOutput" class="label">Generated Image:</label>
-			<img src="" alt="generated image" width="512" height="512" id="generationOutput" class="image">
+			<div class="panel input-panel">
+				<h1 class="title" id="title">First SD Test</h1>
+
+				<div class="input_row">
+					<div class="labelInput">
+						<label for="checkpointSelect" class="label">
+							<i class="material-icons">check_circle</i> Checkpoint:
+						</label>
+						<select id="checkpointSelect" class="dropdown" required>
+							<option value="SDXL-TURBO/sd_xl_turbo_1.0_fp16.safetensors" selected>SDXL TURBO</option>
+							<option value="sdxl_lightning_8step.safetensors">SDXL Lightning</option>
+							<option value="LCM_Dreamshaper_v7_4k.safetensors">LCM Dreamshaper</option>
+						</select>
+					</div>
+
+					<div class="labelInput">
+						<label for="stepsInput" class="label">
+							<i class="material-icons">timer</i> Number of Steps:
+						</label>
+						<div class="sliderArea">
+							<input type="range" id="stepsInput" class="slider" min="1" max="8" value="1">
+							<span id="stepsValue" class="slider-value">1</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="labelInput">
+					<label for="promptInput" class="label">
+						<i class="material-icons">text_fields</i> Prompt:
+					</label>
+					<textarea name="prompt" id="promptInput" class="textarea" placeholder="Input your prompt..."></textarea>
+				</div>
+
+				<div class="labelInput">
+					<label for="progressBar" class="label">
+						<i class="material-icons">hourglass_empty</i> Progress: <span id="progressValue"></span>
+					</label>
+					<progress id="progressBar" class="progress-bar" value="0" max="100">0</progress>
+				</div>
+				<div class="seed-output-area">
+					<i class="material-icons small">fingerprint</i>
+					<p id="seed-output"></p>
+				</div>
+			</div>
+
+
+			<div class="panel output-panel">
+				<img src="" alt="generated image" width="512" height="512" id="generationOutput" class="image">
+			</div>
 		</div>
+		<script src="thesis/js/app.js"></script>
+		<script>
+			document.getElementById('stepsInput')
+				.addEventListener('input', function() {
+					document.getElementById('stepsValue')
+						.textContent = this.value;
+				});
+		</script>
 	</body>
-	<script src="thesis/js/app.js"></script>
 
 </html>

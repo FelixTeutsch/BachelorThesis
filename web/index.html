@@ -45,6 +45,31 @@
 				</div>
 
 				<div class="labelInput">
+					<label for="radio-card-container" class="label">
+						<i class="material-icons">aspect_ratio</i> Resolution:
+					</label>
+					<div class="radio-card-container">
+						<input type="radio" value="512" name="resolution" id="res_512" class="radio-card-input" checked="checked">
+						<label for="res_512" class="radio-card">
+							<div class="radio-card-label">M</div>
+							<div class="radio-card-resolution">512 x 512</div>
+						</label>
+
+						<input type="radio" value="1024" name="resolution" id="res_1024" class="radio-card-input">
+						<label for="res_1024" class="radio-card">
+							<div class="radio-card-label">L</div>
+							<div class="radio-card-resolution">1024 x 1024</div>
+						</label>
+
+						<input type="radio" value="2048" name="resolution" id="res_2048" class="radio-card-input">
+						<label for="res_2048" class="radio-card">
+							<div class="radio-card-label">XL</div>
+							<div class="radio-card-resolution">2048 x 2048</div>
+						</label>
+					</div>
+				</div>
+
+				<div class="labelInput">
 					<label for="progressBar" class="label">
 						<i class="material-icons">hourglass_empty</i> Progress: <span id="progressValue"></span>
 					</label>

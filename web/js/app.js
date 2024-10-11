@@ -82,6 +82,7 @@
     const _checkpoint = document.getElementById("checkpointSelect");
     const _steps = document.getElementById("stepsInput");
     const _seedOutput = document.getElementById("seed-output");
+    const _resoluitonValue = 512;
 
     _seedOutput.innerHTML = workflow["3"]["inputs"]["seed"];
 
@@ -114,7 +115,7 @@
             cachedPrompt = currentPrompt;
             cachedCheckpoint = currentCheckpoint;
             cachedSteps = currentSteps;
-            promptTimeout = setTimeout(checkPrompt, 500);
+            promptTimeout = setTimeout(checkPrompt, 1000);
             return;
         }
 
@@ -135,11 +136,21 @@
             lastExecutedSteps = currentSteps;
         }
 
-        promptTimeout = setTimeout(checkPrompt, 500);
+        promptTimeout = setTimeout(checkPrompt, 1000);
     }
 
-    let promptTimeout = setTimeout(checkPrompt, 500);
+    // Resolution controller
+    document.querySelectorAll('.radio-card-input').forEach(input => {
+        input.addEventListener('change', function () {
+            if (this.checked) {
+                const label = this.nextElementSibling;
+                label.getClassList().add("selected");
+                console.log(label.value);
+            }
+        });
+    });
+
+
+    let promptTimeout = setTimeout(checkPrompt, 1000);
 
 })(window, document, undefined);
-
-

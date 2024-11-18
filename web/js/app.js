@@ -49,13 +49,17 @@
             const progress = data['data']['node'];
             if (!progress) {
                 generationProgressBar.innerHTML = `100%`;
-                generationProgressBar.value = stepInfo.progress;
+                generationProgressBar.value = 100;
                 return;
             }
             const stepInfo = steps[progress]
             generationProgressBar.value = stepInfo.progress;
             generationProgressBar.innerHTML = `${stepInfo.progress}%`;
             generaitonProgressValue.innerHTML = ` ${stepInfo.step} (${stepInfo.progress}%)`;
+        } else if (data.type === 'progress') {
+            generationProgressBar.value += data.data.value;
+            generationProgressBar.innerHTML = `${generaitonProgressValue.value}%`;
+            generaitonProgressValue.innerHTML = `(${data.data.value * 100 / data.data.max}%)`;
         }
     });
 
@@ -82,24 +86,27 @@
     const _checkpoint = document.getElementById("checkpointSelect");
     const _steps = document.getElementById("stepsInput");
     const _seedOutput = document.getElementById("seed-output");
-    const _resoluitonValue = 512;
+    let _resoluitonValue = 512;
 
     _seedOutput.innerHTML = workflow["3"]["inputs"]["seed"];
 
     let cachedPrompt = _prompt.value;
     let cachedCheckpoint = _checkpoint.value;
     let cachedSteps = _steps.value;
+    let cachedResolution = _resoluitonValue
     let lastExecutedPrompt = null;
     let lastExecutedCheckpoint = null;
     let lastExecutedSteps = null;
+    let lastExecutedResolution = null;
 
     async function checkPrompt() {
         const currentPrompt = _prompt.value;
         const currentCheckpoint = _checkpoint.value;
         const currentSteps = _steps.value;
+        const currentResolution = _resoluitonValue;
         clearTimeout(promptTimeout);
 
-        if (currentPrompt.length < 4 || currentPrompt != cachedPrompt || currentCheckpoint != cachedCheckpoint || currentSteps != cachedSteps) {
+        if (currentPrompt.length < 4 || currentPrompt != cachedPrompt || currentCheckpoint != cachedCheckpoint || currentSteps != cachedSteps || currentResolution != cachedResolution) {
             if (currentPrompt != cachedPrompt) {
                 console.log("Prompt changed to:", currentPrompt);
             }
@@ -112,9 +119,14 @@
                 console.log("Steps changed to:", currentSteps);
             }
 
+            if (currentResolution != cachedResolution) {
+                console.log("Resolution chagned to:", currentResolution);
+            }
+
             cachedPrompt = currentPrompt;
             cachedCheckpoint = currentCheckpoint;
             cachedSteps = currentSteps;
+            cachedResolution = currentResolution;
             promptTimeout = setTimeout(checkPrompt, 1000);
             return;
         }
@@ -125,15 +137,25 @@
         workflow["4"]["inputs"]["ckpt_name"] = cachedCheckpoint;
         // Set steps
         workflow["3"]["inputs"]["steps"] = cachedSteps;
+        // Set resolution
+        workflow["5"]["inputs"]["width"] = cachedResolution;
+        workflow["5"]["inputs"]["height"] = cachedResolution;
+
+        // Batch size
+        // TODO: think about implementing a batch size input
+        workflow["5"]["inputs"]["batch_size"] = 1;
+
+
 
         // workflow["3"]["inputs"]["seed"] = Math.floor(Math.random() * 9999999999);
 
-        if (lastExecutedPrompt !== currentPrompt || lastExecutedCheckpoint !== currentCheckpoint || lastExecutedSteps !== currentSteps) {
+        if (lastExecutedPrompt !== currentPrompt || lastExecutedCheckpoint !== currentCheckpoint || lastExecutedSteps !== currentSteps || lastExecutedResolution !== currentResolution) {
             console.log("Workflow queued:", workflow);
             await queue_prompt(workflow);
             lastExecutedPrompt = currentPrompt;
             lastExecutedCheckpoint = currentCheckpoint;
             lastExecutedSteps = currentSteps;
+            lastExecutedResolution = currentResolution
         }
 
         promptTimeout = setTimeout(checkPrompt, 1000);
@@ -144,8 +166,8 @@
         input.addEventListener('change', function () {
             if (this.checked) {
                 const label = this.nextElementSibling;
-                label.getClassList().add("selected");
-                console.log(label.value);
+                label.classList.add("selected");
+                _resoluitonValue = this.value;
             }
         });
     });
@@ -154,3 +176,4 @@
     let promptTimeout = setTimeout(checkPrompt, 1000);
 
 })(window, document, undefined);
+

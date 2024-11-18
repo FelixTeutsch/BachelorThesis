@@ -20,9 +20,10 @@
 							<i class="material-icons">check_circle</i> Checkpoint:
 						</label>
 						<select id="checkpointSelect" class="dropdown" required>
-							<option value="SDXL-TURBO/sd_xl_turbo_1.0_fp16.safetensors" selected>SDXL TURBO</option>
-							<option value="sdxl_lightning_8step.safetensors">SDXL Lightning</option>
-							<option value="LCM_Dreamshaper_v7_4k.safetensors">LCM Dreamshaper</option>
+							<option value="Umami SD 1.5 LCM.safetensors">1.5 | Umami</option>
+							<option value="SDXL-TURBO/sd_xl_turbo_1.0_fp16.safetensors" selected>SDXL | TURBO</option>
+							<option value="sdxl_lightning_8step.safetensors">SDXL | Lightning</option>
+							<option value="LCM_Dreamshaper_v7_4k.safetensors">LCM | Dreamshaper</option>
 						</select>
 					</div>
 
@@ -31,7 +32,7 @@
 							<i class="material-icons">timer</i> Number of Steps:
 						</label>
 						<div class="sliderArea">
-							<input type="range" id="stepsInput" class="slider" min="1" max="8" value="1">
+							<input type="range" id="stepsInput" class="slider" min="1" max="20" value="1">
 							<span id="stepsValue" class="slider-value">1</span>
 						</div>
 					</div>
@@ -68,13 +69,6 @@
 						</label>
 					</div>
 				</div>
-
-				<div class="labelInput">
-					<label for="progressBar" class="label">
-						<i class="material-icons">hourglass_empty</i> Progress: <span id="progressValue"></span>
-					</label>
-					<progress id="progressBar" class="progress-bar" value="0" max="100">0</progress>
-				</div>
 				<div class="seed-output-area">
 					<i class="material-icons small">fingerprint</i>
 					<p id="seed-output"></p>
@@ -84,6 +78,12 @@
 
 			<div class="panel output-panel">
 				<img src="" alt="generated image" width="512" height="512" id="generationOutput" class="image">
+				<div class="labelInput">
+					<label for="progressBar" class="label">
+						<i class="material-icons">hourglass_empty</i> Progress: <span id="progressValue"></span>
+					</label>
+					<progress id="progressBar" class="progress-bar" value="0" max="100">0</progress>
+				</div>
 			</div>
 		</div>
 		<script src="thesis/js/app.js"></script>

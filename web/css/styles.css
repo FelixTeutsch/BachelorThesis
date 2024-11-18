@@ -199,8 +199,13 @@ h1.title {
     align-items: center;
     overflow: hidden;
     padding: 0 !important;
+    flex-direction: column;
 }
 
+.output-panel .labelInput {
+    margin: 1rem;
+    width: 100%;
+}
 
 progress[value] {
     --w: 100%;
@@ -258,9 +263,16 @@ progress[value]::-moz-progress-bar {
     border: 2px solid rgba(255, 255, 255, .5);
     border-radius: 8px;
     cursor: pointer;
-    transition: border 0.3s, background-color 0.3s;
+    transition: all 0.3s ease;
     color: #f8f8f2;
     text-align: center;
+    position: relative;
+    user-select: none;
+}
+
+.radio-card:hover {
+    background-color: rgb(98, 114, 164, .5);
+    border: 2px solid rgba(255, 255, 255, .75);
 }
 
 .radio-card-label {
@@ -269,8 +281,8 @@ progress[value]::-moz-progress-bar {
 }
 
 .radio-card-resolution {
-    position: relative;
-    bottom: 5;
+    position: absolute;
+    bottom: 8px;
     font-size: 12px;
     opacity: 0.5;
 }

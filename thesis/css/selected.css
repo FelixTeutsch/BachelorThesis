@@ -1,0 +1,6 @@
+.selected {
+	border: 2px solid var(--c_primary);
+	border-radius: var(--br_medium);
+	box-shadow: var(--sh_input_select);
+	padding: var(--s_selected_padding);
+}

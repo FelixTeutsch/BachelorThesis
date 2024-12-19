@@ -1,0 +1,29 @@
+/* --------------- TITLE --------------- */
+.label[ft-title]:hover:after {
+	opacity: 1;
+	transition: all 0.25s ease 0.5s;
+	visibility: visible;
+}
+
+.label[ft-title]:after {
+	content: attr(ft-title);
+	background-color: var(--c_background);
+	color: var(--c_text);
+	font-family: var(--f_f_text);
+	font-size: var(--f_s_text);
+	position: absolute;
+	padding: 8px 16px;
+	bottom: 0;
+	left: 110%;
+	white-space: nowrap;
+	box-shadow: var(--sh_panel);
+	opacity: 0;
+	border: var(--border_input);
+	border-radius: var(--br_medium);
+	z-index: 99999;
+	visibility: hidden;
+}
+
+.label[ft-title] {
+	position: relative;
+}

@@ -1,0 +1,116 @@
+#notification-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    gap: 16px;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+#notification {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--br_medium);
+    box-shadow: var(--sh_panel);
+    min-width: 400px;
+    color: var(--c_note_text);
+    border-left: solid var(--br_large) transparent;
+    transition: all 0.3s ease;
+}
+
+#notification .icon_default {
+    font-size: 3rem;
+    padding: 2rem 1rem;
+}
+
+#notification-close {
+    cursor: pointer;
+    font-size: 2rem !important;
+    padding: 0 !important;
+}
+
+#notification .notificaiton-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+    max-width: 400px;
+    max-height: calc(var(--f_s_text) * 12);
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+}
+
+#notification .notificaiton-text h2 {
+    font-size: var(--f_s_heading);
+    margin: 0;
+    text-transform: uppercase;
+}
+
+#notification .notificaiton-text p {
+    font-size: var(--f_s_text);
+    margin: 0;
+    color: var(--c_note_text);
+}
+
+#notification button.close {
+    background: none;
+    border: none;
+    color: var(--c_note_text);
+    cursor: pointer;
+    align-self: flex-start;
+    transition: color 0.3s ease;
+}
+
+#notification button.close:hover {
+    color: var(--c_text);
+}
+
+/* Success Notification */
+#notification.success {
+    background-color: var(--c_success_background);
+    color: var(--c_success_title);
+    box-shadow: 0 0 10px 0 var(--c_success_dropshadow);
+    border-color: var(--c_success_accent);
+}
+
+#notification.success .icon_default {
+    color: var(--c_success_accent);
+}
+
+/* Warning Notification */
+#notification.warning {
+    background-color: var(--c_warning_background);
+    color: var(--c_warning_title);
+    box-shadow: 0 0 10px 0 var(--c_warning_dropshadow);
+    border-color: var(--c_warning_accent);
+}
+
+#notification.warning .icon_default {
+    color: var(--c_warning_accent);
+}
+
+/* Error Notification */
+#notification.error {
+    background-color: var(--c_error_background);
+    color: var(--c_error_title);
+    box-shadow: 0 0 10px 0 var(--c_error_dropshadow);
+    border-color: var(--c_error_accent);
+}
+
+#notification.error .icon_default {
+    color: var(--c_error_accent);
+}

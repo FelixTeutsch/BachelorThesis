@@ -1,0 +1,27 @@
+#output-history {
+	width: 100%;
+	height: fit-content;
+	min-height: 32px;
+	max-height: 96px;
+	border-radius: var(--br_medium);
+	box-shadow: var(--sh_panel);
+	display: flex;
+	justify-content: end;
+	align-items: end;
+	flex-direction: row-reverse;
+	background-color: var(--c_panel);
+	padding: var(--s_panel_padding);
+	overflow-x: auto;
+	gap: var(--s_output-history_gap);
+}
+
+.output-history-image {
+	height: 64px;
+	width: 64px;
+	object-fit: cover;
+	aspect-ratio: 1 / 1;
+	border-radius: var(--br_medium);
+	box-shadow: var(--sh_panel);
+	user-select: none;
+	cursor: pointer;
+}

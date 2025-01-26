@@ -215,7 +215,7 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
     socket.addEventListener('message', (event) => {
         const data = JSON.parse(event.data);
         switch (data.type) {
-            case 'status':
+            case 'statusfe':
                 console.log("Current status\nQueues remaining:", data.data.status.exec_info.queue_remaining);
                 if (data.data.status.exec_info.queue_remaining > 0) {
                     resetProgress();

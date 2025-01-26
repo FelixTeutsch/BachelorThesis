@@ -1,0 +1,1 @@
+SELECT * FROM images WHERE width = %s AND height = %s AND model = %s AND promptName = %s AND steps = %s AND sampler = %s AND cfgScale = %s AND lora = %s AND seed = %s

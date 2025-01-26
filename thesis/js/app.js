@@ -3,6 +3,7 @@ import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
 import { saveImageData, checkImageExists } from './utils/SaveUtils.js';
+import { refreshImages } from './old-pictures.js';
 
 (async (window, document, undefined) => {
     // UUID generator
@@ -271,8 +272,8 @@ import { saveImageData, checkImageExists } from './utils/SaveUtils.js';
 
                     generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
                 }
-                // TODO: save image to history & DB
-                saveImageData(
+                // save image to history & DB
+                await saveImageData(
                     {
                         model: inputValues.model.value,
                         prompt: inputValues.prompt.value,
@@ -286,6 +287,8 @@ import { saveImageData, checkImageExists } from './utils/SaveUtils.js';
                         imagePath: generationOutput.src,
                     }
                 );
+                // refresh image list
+                refreshImages();
                 break;
             case 'progress':
                 console.log("Progress:", data.data.value, "of", data.data.max);

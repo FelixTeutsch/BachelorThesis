@@ -25,8 +25,8 @@ async function loadOldPictures() {
     }
 }
 
-// Function to refresh images and add new ones
-async function refreshImages() {
+export const refreshImages = async () => {
+    console.log('Refreshing images...');
     try {
         const outputHistory = document.getElementById('output-history');
         const existingImages = new Set(
@@ -56,7 +56,7 @@ async function refreshImages() {
     } catch (error) {
         console.error('Error refreshing images:', error);
     }
-}
+};
 
 // Load pictures when the page loads
 document.addEventListener('DOMContentLoaded', loadOldPictures);

@@ -56,7 +56,6 @@ image_cursor = image_db.cursor()
 
 sqlSelect = "SELECT * FROM images"
 sqlInsert = "INSERT INTO images (filename, size, width, height, path, model, promptName, steps, sampler, cfgScale, lora, seed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-sqlSelect = "SELECT id, filename, path FROM images WHERE width = %s AND height = %s AND model = %s AND promptName = %s AND steps = %s AND sampler = %s AND cfgScale = %s AND lora = %s AND seed = %s"
 
 
 @server.PromptServer.instance.routes.get("/thesis")

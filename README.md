@@ -1,67 +1,93 @@
-# Bachelor Thesis
+# Thesis Project - AI Image Generation Interface
 
-This project is part of my bachelor thesis
+A web interface for generating and managing AI images using ComfyUI.
 
-## Abstract
+## Quick Start
 
-This project is part of my bachelor thesis. The goal is to create a UI for
-CompfyUI that can be controlled using a custom controller.
+ComfyUI must be installed and set up before running this project
+
+```bash
+cd <comfyui_directory>/custom_nodes
+git clone https://github.com/FelixTeutsch/BachelorThesis.git
+cd Thesis
+pip install -r requirements.txt
+```
+
+Visit `http://localhost:8188/thesis` after starting ComfyUI.
+
+## Prerequisites
+
+- Python 3.8+
+- ComfyUI installed
+- MySQL/MariaDB
 
 ## Installation
 
-A prerequisite for running the application is to have Python installed on your
-machine aswell as a functioning version of comfyUI. To install comfyUI, follow
-the instructions on the
-[comfyUI GitHub page](https://github.com/comfyanonymous/ComfyUI).
+### 1. ComfyUI Setup
 
-### 1. Installing the Application
+1. Clone this repository into ComfyUI's `custom_nodes` directory
+2. Install dependencies:
+      ```bash
+      pip install -r requirements.txt
+      ```
+3. Start ComfyUI - the application will be available at
+   `http://localhost:8188/thesis`
 
-To run the application, follow these steps:
+### 2. Database Setup
 
-1. Clone the repository to your local into the comfyUI custom_nodes directory
-2. Install the necessary dependencies into the comfyUI environment by running
-   `pip install -r requirements.txt`
-3. The application starts automatically when you run comfyUI and is accessible
-   at `http://localhost:8188/thesis`
-
-### 2. Setting up the Database
-
-The generated images are saved in the /thesis/output directory. The database
-saves the reference to the generated images and is a quicker way of looking up
-their existance & location. To set up the database, follow these steps:
-
-1. Setup a SQL database and create a table with the following schema:
+#### Create Database Schema
 
 ```sql
-CREATE TABLE
-    IF NOT EXISTS images (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filename TEXT,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        size INTEGER,
-        width INTEGER,
-        height INTEGER,
-        path TEXT,
-        model TEXT,
-        promptName TEXT,
-        steps INTEGER,
-        sampler TEXT,
-        cfgScale REAL,
-        lora TEXT,
-        metadata_width INTEGER,
-        metadata_height INTEGER,
-        seed INTEGER
-    );
+CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    size INTEGER,
+    width INTEGER,
+    height INTEGER,
+    path TEXT,
+    model TEXT,
+    promptName TEXT,
+    steps INTEGER,
+    sampler TEXT,
+    cfgScale REAL,
+    lora TEXT,
+    metadata_width INTEGER,
+    metadata_height INTEGER,
+    seed INTEGER
+);
 ```
 
-2. Create a .env file in the root directory of the application with the
-   following content:
+#### Configure Environment
+
+Create
+
+.env
+
+file in project root:
 
 ```env
-DB_HOST=<host>
-DB_USER=<root>
-DB_PASSWORD=<password>
-DB_NAME=<db_name>
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=your_database
 ```
 
-Replace the placeholders with the actual values.
+## Storage
+
+Generated images are saved in output directory. The database maintains
+references for quick lookups.
+
+## Features
+
+- Image generation through ComfyUI
+- Database-backed image management
+- Real-time generation progress
+- Image metadata tracking
+
+## Technical Details
+
+- Frontend: JavaScript/HTML
+- Backend: Python
+- Database: MySQL/MariaDB
+- Integration: ComfyUI custom nodes

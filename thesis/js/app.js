@@ -2,6 +2,8 @@ import { loadModels, loadLoras, loadPrompts, loadSamplers } from './config/popul
 import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
+import { saveImageData, checkImageExists } from './utils/SaveUtils.js';
+
 (async (window, document, undefined) => {
     // UUID generator
     function uuidv4() { return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1),)[0] & (15 >> (c / 4)))).toString(16)); }
@@ -32,24 +34,47 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
 
-        try {
-            const response = await fetch('/prompt', {
-                method: 'POST',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
+        // Check if workflow has already been prompted
+        const exists = await checkImageExists({
+            model: inputValues.model.value,
+            prompt: inputValues.prompt.value,
+            steps: inputValues.steps.value,
+            sampler: inputValues.sampler.value,
+            cfg_scale: inputValues['gfc-scale'].value,
+            lora: inputValues.lora.value,
+            width: inputValues.size.value.split('x')[0],
+            height: inputValues.size.value.split('x')[0], // TODO: validate where the size is
+            seed: inputValues.seed.value,
+        });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        if (exists.exists) {
+            // Image has already been generated. To save computing power, we will not generate it again.
+            console.log("Prompt already exists:", exists);
+            // showNotification('Info', 'Prompt already exists:' + exists.path, NotificationType.SUCCESS);
+            generationOutput.src = exists.path;
+            finishProgress();
+            return;
+        } else {
+            // else queue prompt
+            try {
+                const response = await fetch('/prompt', {
+                    method: 'POST',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                console.log("Prompt was queued:", response);
+            } catch (error) {
+                console.error("Error queuing prompt:", error);
+                showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
             }
-
-            console.log("Prompt was queued:", response);
-        } catch (error) {
-            console.error("Error queuing prompt:", error);
-            showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
         }
     }
 
@@ -177,8 +202,8 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
             setLastExecuted();
         }
 
-        // TODO: uncomment as soon as the programm is working propperly
-        // promptTimeout = setTimeout(checkPrompt, 1000);
+        // Queue next generation
+        promptTimeout = setTimeout(checkPrompt, 1000);
     }
 
     // Populate inputs before initializing the input handler
@@ -212,8 +237,19 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
 
 
     // Websocket message handler
-    socket.addEventListener('message', (event) => {
-        const data = JSON.parse(event.data);
+    socket.addEventListener('message', async (event) => {
+        var data = "";
+        try {
+            if (event.data instanceof Blob) {
+                return;
+            } else {
+                data = JSON.parse(event.data);
+            }
+        } catch (error) {
+            console.error("Error parsing websocket message:", error);
+            showNotification('Error', `Failed to parse websocket message: ${error.message}`, NotificationType.ERROR);
+            return;
+        }
         switch (data.type) {
             case 'statusfe':
                 console.log("Current status\nQueues remaining:", data.data.status.exec_info.queue_remaining);
@@ -222,7 +258,7 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
                 }
                 break;
             case 'executing':
-                console.log("Currently executing\nPromptID:", data.data.prompt_id, "\nTimestamp:", new Date(data.data.timestamp).toLocaleString());
+                console.log("Currently executing\nPromptID:", data.data.prompt_id, "\nCurrent node:", data.data.node);
                 break;
             case 'executed':
                 finishProgress();
@@ -235,6 +271,21 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
 
                     generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
                 }
+                // TODO: save image to history & DB
+                saveImageData(
+                    {
+                        model: inputValues.model.value,
+                        prompt: inputValues.prompt.value,
+                        steps: inputValues.steps.value,
+                        sampler: inputValues.sampler.value,
+                        cfg_scale: inputValues['gfc-scale'].value,
+                        lora: inputValues.lora.value,
+                        width: inputValues.size.value.split('x')[0],
+                        height: inputValues.size.value.split('x')[0], // TODO: figure out where the size is
+                        seed: inputValues.seed.value,
+                        imagePath: generationOutput.src,
+                    }
+                );
                 break;
             case 'progress':
                 console.log("Progress:", data.data.value, "of", data.data.max);
@@ -267,54 +318,5 @@ import { resetProgress, updateProgress, finishProgress } from './progress.js';
                 break;
         }
     });
-
-    // Observed options:
-    // status
-    // execution_start
-    // execution_cached
-    // executing
-    // execution_error
-
-    // if (data.type === 'executed') {
-    //     console.log(data)
-    //     if ('images' in data['data']['output']) {
-    //         const image = data['data']['output']['images'][0];
-    //         const filename = image['filename']
-    //         const subfolder = image['subfolder']
-    //         const rand = Math.random();
-
-    //         generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
-    //     }
-    // } else if (data.type === 'executing') {
-    //     const steps = {
-    //         '3': {
-    //             step: 'KSampler',
-    //             progress: 33,
-    //         },
-    //         '8': {
-    //             step: 'VAE Decode',
-    //             progress: 66,
-    //         },
-    //         '9': {
-    //             step: 'Save Image',
-    //             progress: 100,
-    //         }
-    //     }
-    //     const progress = data['data']['node'];
-    //     if (!progress) {
-    //         generationProgressBar.innerHTML = `100%`;
-    //         generationProgressBar.value = 100;
-    //         return;
-    //     }
-    //     const stepInfo = steps[progress]
-    //     generationProgressBar.value = stepInfo.progress;
-    //     generationProgressBar.innerHTML = `${stepInfo.progress}%`;
-    //     generaitonProgressValue.innerHTML = ` ${stepInfo.step} (${stepInfo.progress}%)`;
-    // } else if (data.type === 'progress') {
-    //     generationProgressBar.value += data.data.value;
-    //     generationProgressBar.innerHTML = `${generaitonProgressValue.value}%`;
-    //     generaitonProgressValue.innerHTML = `(${data.data.value * 100 / data.data.max}%)`;
-    // }
-    // );
 
 })(window, document, undefined);

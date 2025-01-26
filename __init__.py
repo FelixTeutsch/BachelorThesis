@@ -55,8 +55,8 @@ image_db = mysql.connector.connect(
 image_cursor = image_db.cursor()
 
 sqlSelect = "SELECT * FROM images"
-sqlInsert = "INSERT INTO images (filename, width, height, path, model, promptName, steps, sampler, cfgScale, lora, seed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-sqlSelect = "SELECT * FROM images WHERE width = %s AND height = %s AND model = %s AND promptName = %s AND steps = %s AND sampler = %s AND cfgScale = %s AND lora = %s AND seed = %s"
+sqlInsert = "INSERT INTO images (filename, size, width, height, path, model, promptName, steps, sampler, cfgScale, lora, seed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+sqlSelect = "SELECT id, filename, path FROM images WHERE width = %s AND height = %s AND model = %s AND promptName = %s AND steps = %s AND sampler = %s AND cfgScale = %s AND lora = %s AND seed = %s"
 
 
 @server.PromptServer.instance.routes.get("/thesis")
@@ -140,10 +140,31 @@ async def save_image(request):
         os.makedirs(output_dir, exist_ok=True)
 
         # Decode base64 image
-        logger.debug("Decoding image data")
+        logger.info("Decoding image data")
         image_data = data.get("imageData")
-        image_binary = base64.b64decode(
-            image_data.split(",")[1] if "," in image_data else image_data
+
+        # Handle base64 encoded image data
+        image_binary = None
+        try:
+            logger.info("Processing base64 image data")
+            if "data:image/png;base64," in image_data:
+                # Remove data URI prefix
+                base64_data = image_data.replace("data:image/png;base64,", "")
+            else:
+                base64_data = image_data
+
+            image_binary = base64.b64decode(base64_data)
+            logger.info(
+                f"Successfully decoded base64 image data, size: {len(image_binary)} bytes"
+            )
+        except Exception as e:
+            logger.error(f"Error decoding base64 image data: {str(e)}")
+            raise
+
+        logger.info(
+            f"Image Binary processed successfully: {image_data[:30]}..."
+            if len(image_data) > 30
+            else image_data
         )
 
         # Create image and add metadata
@@ -154,7 +175,7 @@ async def save_image(request):
         metadata_dict = data.get("metadata", {})
         metadata_dict["createdAt"] = datetime.now().isoformat()
 
-        logger.debug("Adding metadata to image")
+        logger.info("Adding metadata to image")
         for key, value in metadata_dict.items():
             if value is not None:  # Only add non-null values
                 metadata.add_text(key, str(value))
@@ -164,23 +185,28 @@ async def save_image(request):
         logger.info(f"Saving image with metadata to: {image_path}")
         image.save(image_path, pnginfo=metadata)
 
+        relative_path = f"/thesis/output/{image_name}"
+
+        params = (
+            image_name,
+            len(image_binary),
+            image.width,
+            image.height,
+            relative_path,
+            metadata_dict.get("model"),
+            metadata_dict.get("promptName"),
+            metadata_dict.get("steps"),
+            metadata_dict.get("sampler"),
+            metadata_dict.get("cfgScale"),
+            metadata_dict.get("lora"),
+            metadata_dict.get("seed"),
+        )
+
+        logger.info(f"SQL request with query: {sqlInsert} and params: {params}")
         # Save image to database
         image_cursor.execute(
             sqlInsert,
-            (
-                image_name,
-                len(image_binary),
-                image.width,
-                image.height,
-                image_path,
-                metadata_dict.get("model"),
-                metadata_dict.get("promptName"),
-                metadata_dict.get("steps"),
-                metadata_dict.get("sampler"),
-                metadata_dict.get("cfgScale"),
-                metadata_dict.get("lora"),
-                metadata_dict.get("seed"),
-            ),
+            params,
         )
         image_db.commit()
 
@@ -238,13 +264,13 @@ async def get_image(request):
         search_params = {
             "model": request.query.get("model"),
             "promptName": request.query.get("prompt"),
-            "steps": request.query.get("steps"),
+            "steps": int(request.query.get("steps")),  # Convert to integer
             "sampler": request.query.get("sampler"),
-            "cfgScale": request.query.get("cfg_scale"),
+            "cfgScale": float(request.query.get("cfg_scale")),  # Convert to float
             "lora": request.query.get("lora"),
-            "width": request.query.get("width"),
-            "height": request.query.get("height"),
-            "seed": request.query.get("seed"),
+            "width": int(request.query.get("width")),  # Convert to integer
+            "height": int(request.query.get("height")),  # Convert to integer
+            "seed": int(request.query.get("seed")),  # Convert to integer
         }
 
         # Remove None values
@@ -257,39 +283,34 @@ async def get_image(request):
             )
 
         # Build dynamic query
-        conditions = " AND ".join([f"{k} = ?" for k in search_params.keys()])
+        conditions = " AND ".join(
+            [f"{k} = %s" for k in search_params.keys()]
+        )  # Change ? to %s
         values = tuple(search_params.values())
 
-        sql_query = f"SELECT * FROM images WHERE {conditions}"
+        sql_query = f"SELECT id, filename, path FROM images WHERE {conditions}"
 
         # Execute query
         image_cursor.execute(sql_query, values)
-        image = image_cursor.fetchone()
+        images = image_cursor.fetchall()
+        image_db.commit()
 
-        if not image:
+        if not images:
             logger.warning(f"No image found matching parameters: {search_params}")
             return web.json_response(
                 {"success": False, "message": "No matching image found"}, status=404
             )
 
-        logger.info(f"Successfully found matching image")
+        # logger.info(f"Successfully found matching image")
+        logger.info(f"Image found: {images}")
         return web.json_response(
             {
                 "success": True,
                 "message": "Image found successfully",
                 "data": {
-                    "id": image[0],
-                    "filename": image[1],
-                    "width": image[2],
-                    "height": image[3],
-                    "path": image[4],
-                    "model": image[5],
-                    "promptName": image[6],
-                    "steps": image[7],
-                    "sampler": image[8],
-                    "cfgScale": image[9],
-                    "lora": image[10],
-                    "seed": image[11],
+                    "id": images[0][0],
+                    "filename": images[0][1],
+                    "path": images[0][2],
                 },
             }
         )

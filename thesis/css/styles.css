@@ -47,6 +47,7 @@
 	--s_body_padding: 1rem;
 	--s_body_gap: 1rem;
 	--s_panel_padding: 1rem 2rem;
+	--s_panel_padding_small: 8px 1rem;
 	--s_panel_gap_row: 24px;
 	--s_panel_gap_column: 24px;
 	--s_label_gap: 6px;
@@ -267,13 +268,11 @@ select {
 }
 
 .slider {
-	background: linear-gradient(
-		to right,
-		var(--c_primary) 0%,
-		var(--c_primary) 50%,
-		var(--c_secondary) 50%,
-		var(--c_secondary) 100%
-	);
+	background: linear-gradient(to right,
+			var(--c_primary) 0%,
+			var(--c_primary) 50%,
+			var(--c_secondary) 50%,
+			var(--c_secondary) 100%);
 }
 
 .slider::-webkit-slider-thumb {

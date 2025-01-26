@@ -1,27 +1,94 @@
 #output-history {
+	/* Positioning & Display */
+	position: relative;
+	display: flex;
+
+	/* Box Model */
 	width: 100%;
 	height: fit-content;
 	min-height: 32px;
-	max-height: 96px;
+	padding: 0;
+
+	/* Visual */
+	background-color: var(--c_panel);
 	border-radius: var(--br_medium);
 	box-shadow: var(--sh_panel);
+
+	/* Flex Container */
+	justify-content: end;
+	align-items: end;
+	gap: var(--s_output-history_gap);
+
+	/* Scrollbar Base */
+	scrollbar-width: thin;
+	scrollbar-color: var(--c_primary) transparent;
+}
+
+#output-history-mask {
+	/* Positioning & Display */
+	position: relative;
 	display: flex;
+
+	/* Box Model */
+	width: 100%;
+	height: fit-content;
+	min-height: 32px;
+	padding: var(--s_panel_padding_small);
+	overflow-x: auto;
+
+	/* Flex Container */
 	justify-content: end;
 	align-items: end;
 	flex-direction: row-reverse;
-	background-color: var(--c_panel);
-	padding: var(--s_panel_padding);
-	overflow-x: auto;
 	gap: var(--s_output-history_gap);
+
+	/* Mask Effect */
+	mask-image: linear-gradient(to right,
+			transparent,
+			black 12%,
+			black 88%,
+			transparent 100%);
+}
+
+/* Webkit Scrollbar Styling */
+#output-history::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+#output-history::-webkit-scrollbar-thumb {
+	background-color: var(--c_primary);
+	border-radius: var(--br_small);
+}
+
+#output-history::-webkit-scrollbar-thumb:hover {
+	background-color: var(--c_primary_dark);
+}
+
+#output-history::-webkit-scrollbar-track {
+	background-color: transparent;
+}
+
+#output-history::-webkit-scrollbar-button,
+#output-history::-webkit-scrollbar-corner {
+	display: none;
 }
 
 .output-history-image {
-	height: 64px;
+	/* Box Model */
 	width: 64px;
-	object-fit: cover;
-	aspect-ratio: 1 / 1;
+	height: 64px;
+
+	/* Visual */
 	border-radius: var(--br_medium);
 	box-shadow: var(--sh_panel);
+
+	/* Content */
+	object-fit: cover;
+	aspect-ratio: 1 / 1;
+
+	/* Interactivity */
 	user-select: none;
 	cursor: pointer;
+	transition: transform 0.3s ease-out;
 }

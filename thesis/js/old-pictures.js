@@ -1,7 +1,7 @@
 // Function to load and display old pictures
 async function loadOldPictures() {
     try {
-        const outputHistory = document.getElementById('output-history');
+        const outputHistory = document.getElementById('output-history-mask');
         outputHistory.innerHTML = '';
 
         // Fetch image list from our new Python endpoint
@@ -28,7 +28,7 @@ async function loadOldPictures() {
 export const refreshImages = async () => {
     console.log('Refreshing images...');
     try {
-        const outputHistory = document.getElementById('output-history');
+        const outputHistory = document.getElementById('output-history-mask');
         const existingImages = new Set(
             Array.from(outputHistory.getElementsByTagName('img'))
                 .map(img => img.alt)

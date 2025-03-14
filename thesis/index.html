@@ -20,146 +20,52 @@
 
 		<!-- Styles -->
 		<link rel="stylesheet" href="/thesis/css/styles.css">
-		<link rel="stylesheet" href="/thesis/css/ft-title.css">
-		<link rel="stylesheet" href="/thesis/css/output-history.css">
-		<link rel="stylesheet" href="/thesis/css/selected.css">
+		<link rel="stylesheet" href="/thesis/css/prompt-modification.css">
 		<link rel="stylesheet" href="/thesis/css/notification.css">
 	</head>
 
 	<body class="theme">
 		<!---------------- Settings ---------------->
-		<div class="panel input-panel">
-			<h1 class="title">Bachelor Thesis</h1>
-			<button class="settings">
-				<span class="material-symbols-rounded icon_default">
-					settings
-				</span>
-			</button>
-			<!---------------- Model ---------------->
-			<div class="module" id="model-module">
-				<label class="label" for="model" ft-title="The model you want to use.">
-					<span class="material-symbols-rounded icon_big"> neurology </span>
-					<div class="heading">Model</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<select name="model" id="model">
-				</select>
-			</div>
-			<!---------------- Prompt ---------------->
-			<div class="module" id="prompt-module">
-				<label class="label" for="prompt" ft-title="The prompt you want to use.">
-					<span class="material-symbols-rounded icon_big"> description </span>
-					<div class="heading">Prompt</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<select name="prompt" id="prompt">
-				</select>
-			</div>
-
-			<!---------------- Steps ---------------->
-			<div class="module" id="steps-module">
-				<label class="label" ft-title="The number of steps you want to use." for="steps">
-					<span class="material-symbols-rounded icon_big"> timelapse </span>
-					<div class="heading">Steps</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<div class="slider-area">
-					<span id="min-value">0</span>
-					<input type="range" name="steps" id="steps" class="slider" min="1" max="20" value="20">
-					<span id="max-value">20</span>
+		<div id="parameter-area">
+			<!-- PROMPT -->
+			<div id="prompt">
+				<div class="prompt">
+					<p class="prompt-text">
+						Dog
+					</p>
+					<input type="number" name="weight" class="weight" value="5" min="1" max="100">
 				</div>
-			</div>
-			<!---------------- Sampler ---------------->
-			<div class="module" id="sampler-module">
-				<label class="label" for="sampler" ft-title="The sampler you want to use.">
-					<span class="material-symbols-rounded icon_big"> design_services </span>
-					<div class="heading">Sampler</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<select name="sampler" id="sampler">
-				</select>
-			</div>
-
-			<!---------------- GFC Scale ---------------->
-			<div class="module" id="gfc-scale-module">
-				<label class="label" ft-title="The scale of the image you want to generate." for="gfc-scale">
-					<span class="material-symbols-rounded icon_big"> scale </span>
-					<div class="heading">GFC Scale</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<div class="slider-area">
-					<span id="min-value">0</span>
-					<input type="range" name="gfc-scale" id="gfc-scale" class="slider" min="0" max="100" value="50">
-					<span id="max-value">1</span>
+				<div class="prompt">
+					<p class="prompt-text">
+						Cat
+					</p>
+					<input type="number" name="weight" class="weight" value="5" min="1" max="100">
+				</div>
+				<div class="prompt">
+					<p class="prompt-text">
+						House
+					</p>
+					<input type="number" name="weight" class="weight" value="5" min="1" max="100">
 				</div>
 			</div>
 
-			<!---------------- Lora ---------------->
-			<div class="module" id="lora-module">
-				<label class="label" for="lora" ft-title="The lora you want to use.">
-					<span class="material-symbols-rounded icon_big"> table </span>
-					<div class="heading">Lora</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<select name="lora" id="lora">
-				</select>
+			<!-- SEED -->
+			<div id="seed-area">
+				<span class="material-symbols-rounded"> numbers </span>
+				<div id="seed">961946033861284</div>
+				<span class="material-symbols-rounded" id="new-seed"> shuffle </span>
 			</div>
 
-			<!---------------- Size ---------------->
-			<div class="module" id="size-module">
-				<label class="label" ft-title="The size of the image you want to generate.">
-					<span class="material-symbols-rounded icon_big"> photo_size_select_large </span>
-					<div class="heading">Size</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<div class="size-area" id="size-area">
-					<!-- TODO: make this a radio group and refactor design / logic to handl radio groups for easier implementation -->
-					<button class="size-option" id="size-small">
-						<span class="size-option-label heading">S</span>
-						<span class="size-option-text footnote">512x512</span>
-					</button>
-					<button class="size-option" id="size-medium">
-						<span class="size-option-label heading">M</span>
-						<span class="size-option-text footnote">1024x1024</span>
-					</button>
-					<button class="size-option" id="size-large">
-						<span class="size-option-label heading">L</span>
-						<span class="size-option-text footnote">2048x2048</span>
-					</button>
-				</div>
-				<input type="number" name="size" id="size" hidden disabled>
-			</div>
-
-			<!---------------- Seed ---------------->
-			<div class="module" id="seed-module">
-				<label class="label" ft-title="The seed you want to use." for="seed">
-					<span class="material-symbols-rounded icon_big"> numbers </span>
-					<div class="heading">Seed</div>
-					<span class="material-symbols-rounded icon_default"> info </span>
-				</label>
-				<input type="number" name="seed" id="seed" class="input" min="0" max="4294967295" value="4294967295" readonly>
-			</div>
-
-		</div>
-
-
-		<!---------------- Output ---------------->
-		<div class="panel output-panel">
+			<!-- PROGRESS -->
 			<div class="module" id="progress-module">
 				<div class="progress-container">
 					<progress id="progress-bar" class="progress" value="0" max="100"></progress>
 					<div class="progress-text">0%</div>
 				</div>
 			</div>
-
-			<img src="/thesis/output/ComfyUI_00205_.png" alt="Output Image" id="output-image">
-
-			<div class="module" id="output-history">
-				<div id="output-history-mask">
-					<!-- Images will be inserted here by JavaScript -->
-				</div>
-			</div>
 		</div>
+
+		<img src="" alt="The generated image" id="output-image">
 
 		<!-------------------- Notifications ---------------->
 		<div id="notification-wrapper" class="hidden">
@@ -177,48 +83,23 @@
 
 		<!---------------- Scripts ---------------->
 		<script type="module" src="/thesis/js/utils/TextUtils.js"></script>
-
-		<script type="module" src="/thesis/js/config/populate_selects.js"></script>
 		<script type="module" src="/thesis/js/config/input_handler.js"></script>
 		<script type="module" src="/thesis/js/progress.js"></script>
-		<script type="module" src="/thesis/js/old-pictures.js"></script>
-		<script type="module" src="/thesis/js/config/size.js"></script>
 		<script type="module" src="/thesis/js/config/save.js"></script>
 		<script type="module" src="/thesis/js/config/restart.js"></script>
 		<script type="module" src="/thesis/js/app.js"></script>
 		<script type="module" src="/thesis/js/utils/notification.js"></script>
 
 		<script>
-			// Get all sliders on the page
-			const sliders = document.querySelectorAll('input[type="range"]');
+			document.getElementById("new-seed")
+				.addEventListener("click", () => {
+					document.getElementById("seed")
+						.innerText = randomSeed();
+				});
 
-			function updateSliderBackground(slider) {
-				// Calculate the percentage for this specific slider
-				const value = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
-
-				// Update the background gradient for this slider
-				slider.style.background = `linear-gradient(to right, 
-					var(--c_primary) 0%, 
-					var(--c_primary) ${value}%, 
-					var(--c_secondary) ${value}%, 
-					var(--c_secondary) 100%)`;
-
-				// Update the thumb value if it exists
-				const sliderId = slider.id;
-				const thumbValue = document.querySelector(`#${sliderId}-value`);
-				if(thumbValue) {
-					thumbValue.textContent = slider.value;
-					const thumbPosition = (value * slider.offsetWidth / 100) - (thumbValue.offsetWidth / 2);
-					thumbValue.style.left = `${thumbPosition}px`;
-				}
+			function randomSeed() {
+				return Math.floor(Math.random() * 1000000000000000);
 			}
-
-			// Add listeners to all sliders
-			sliders.forEach(slider => {
-				slider.addEventListener('input', () => updateSliderBackground(slider));
-				// Initialize each slider
-				updateSliderBackground(slider);
-			});
 		</script>
 	</body>
 

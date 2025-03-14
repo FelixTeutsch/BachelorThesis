@@ -146,13 +146,15 @@ h6,
 *,
 p,
 .text,
+.prompt-text,
 .footnote {
 	font-family: var(--f_f_text);
 	font-optical-sizing: auto;
 	font-style: normal;
 }
 
-.text {
+.text,
+.prompt-text {
 	font-size: var(--f_s_text);
 }
 

@@ -2,8 +2,7 @@ import { loadModels, loadLoras, loadPrompts, loadSamplers } from './config/popul
 import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
-import { saveImageData, checkImageExists } from './utils/SaveUtils.js';
-import { refreshImages } from './old-pictures.js';
+import { getPrompt } from './utils/TextUtils.js';
 
 (async (window, document, undefined) => {
     // UUID generator
@@ -35,75 +34,46 @@ import { refreshImages } from './old-pictures.js';
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
 
-        // Check if workflow has already been prompted
-        const exists = await checkImageExists({
-            model: inputValues.model.value,
-            prompt: inputValues.prompt.value,
-            steps: inputValues.steps.value,
-            sampler: inputValues.sampler.value,
-            cfg_scale: inputValues['gfc-scale'].value,
-            lora: inputValues.lora.value,
-            width: inputValues.size.value.split('x')[0],
-            height: inputValues.size.value.split('x')[0], // TODO: validate where the size is
-            seed: inputValues.seed.value,
-        });
+        try {
+            console.log("Queuing prompt:", data);
 
-        if (exists.exists) {
-            // Image has already been generated. To save computing power, we will not generate it again.
-            console.log("Prompt already exists:", exists);
-            // showNotification('Info', 'Prompt already exists:' + exists.path, NotificationType.SUCCESS);
-            generationOutput.src = exists.path;
-            finishProgress();
-            return;
-        } else {
-            // else queue prompt
-            try {
-                const response = await fetch('/prompt', {
-                    method: 'POST',
-                    cache: 'no-cache',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
+            const response = await fetch('/prompt', {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                const bodyText = await response.text();
+                var errorMessage = "";
+                try {
+                    const bodyJson = JSON.parse(bodyText);
+                    errorMessage = bodyJson.error.message;
+                } catch (e) {
+                    console.error("Failed to parse response body as JSON:", e);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${response.statusText}`);
                 }
-
-                console.log("Prompt was queued:", response);
-            } catch (error) {
-                console.error("Error queuing prompt:", error);
-                showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
+                throw new Error(`${errorMessage}`);
             }
+
+            console.log("Prompt was queued:", response);
+        } catch (error) {
+            console.error("Error queuing prompt:", error);
+            showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
         }
+        // }
     }
 
     const inputReferences = [
         {
-            workflow: [["4"], ["inputs"], ["ckpt_name"]],
-            reference: document.getElementById('model'),
-        }, {
             workflow: [["6"], ["inputs"], ["text"]],
             reference: document.getElementById('prompt'),
         }, {
-            workflow: [["3"], ["inputs"], ["sampler_name"]],
-            reference: document.getElementById('sampler'),
-        }, {
-            workflow: [["12"], ["inputs"], ["multiplier"]],
-            reference: document.getElementById('gfc-scale'),
-        }, {
-            workflow: [["11"], ["inputs"], ["lora_name"]],
-            reference: document.getElementById('lora'),
-        }, {
-            workflow: [["5"], ["inputs"], ["width"], ["height"]],
-            reference: document.getElementById('size'),
-        }, {
             workflow: [["3"], ["inputs"], ["seed"]],
-            reference: document.getElementById('seed')
-        }, {
-            workflow: [["3"], ["inputs"], ["steps"]],
-            reference: document.getElementById('steps')
+            reference: document.getElementById('seed'),
         },
     ];
 
@@ -120,9 +90,9 @@ import { refreshImages } from './old-pictures.js';
 
     const saveInputValues = function () {
         console.log("reloadInputValues - START");
-        Object.keys(inputValues).forEach(key => {
-            inputValues[key].value = inputValues[key].ref.value;
-        });
+        console.log("Input values:", inputValues);
+        inputValues['seed'].value = document.getElementById('seed').value;
+        inputValues['prompt'].value = getPrompt();
         console.log("reloadInputValues - END", inputValues);
         return inputValues;
     };
@@ -130,7 +100,9 @@ import { refreshImages } from './old-pictures.js';
     const inputValuesChanged = function () {
         console.log("inputValuesChanged - START");
 
-        const result = Object.keys(inputValues).some(key => inputValues[key].value !== inputValues[key].ref.value);
+
+        const result = inputValues['seed'].value !== document.getElementById('seed').value || inputValues['prompt'].value !== getPrompt()
+        //  result = Object.keys(inputValues).some(key => inputValues[key].value !== inputValues[key].ref.value);
 
         console.log("inputValuesChanged - END", result);
         return result;
@@ -204,18 +176,8 @@ import { refreshImages } from './old-pictures.js';
         }
 
         // Queue next generation
-        promptTimeout = setTimeout(checkPrompt, 1000);
+        // promptTimeout = setTimeout(checkPrompt, 1000);
     }
-
-    // Populate inputs before initializing the input handler
-    await Promise.all([loadModels(), loadLoras(), loadPrompts(), loadSamplers()])
-        .then(([models, loras, prompts, samplers]) => {
-            console.log("Inputs loaded:", { models, loras, prompts, samplers });
-        })
-        .catch(error => {
-            console.error("Error initializing selects:", error);
-            showNotification('Error', `Failed to initialize selects: ${error.message}`, NotificationType.ERROR);
-        });
 
     // Initialize the input handler
     const inputHandler = new InputHandler();
@@ -272,23 +234,7 @@ import { refreshImages } from './old-pictures.js';
 
                     generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
                 }
-                // save image to history & DB
-                await saveImageData(
-                    {
-                        model: inputValues.model.value,
-                        prompt: inputValues.prompt.value,
-                        steps: inputValues.steps.value,
-                        sampler: inputValues.sampler.value,
-                        cfg_scale: inputValues['gfc-scale'].value,
-                        lora: inputValues.lora.value,
-                        width: inputValues.size.value.split('x')[0],
-                        height: inputValues.size.value.split('x')[0], // TODO: figure out where the size is
-                        seed: inputValues.seed.value,
-                        imagePath: generationOutput.src,
-                    }
-                );
-                // refresh image list
-                refreshImages();
+
                 break;
             case 'progress':
                 console.log("Progress:", data.data.value, "of", data.data.max);

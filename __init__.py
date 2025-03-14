@@ -45,28 +45,16 @@ server.PromptServer.instance.routes.static(
     "/thesis/output/", path=os.path.join(WEBROOT, "output")
 )
 
-# Database Connection
-image_db = mysql.connector.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME"),
-)
-image_cursor = image_db.cursor()
-
-sqlSelect = "SELECT * FROM images"
-sqlInsert = "INSERT INTO images (filename, size, width, height, path, model, promptName, steps, sampler, cfgScale, lora, seed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-
-
 @server.PromptServer.instance.routes.get("/thesis")
 def get_ui(request):
+    logger.info(f"UI requested from {request.remote}")
     return web.FileResponse(os.path.join(WEBROOT, "index.html"))
 
 
 # Add new endpoint to get images
 @server.PromptServer.instance.routes.get("/thesis/api/images")
 async def get_images(request):
-    logger.info("Fetching images from output directory")
+    logger.info(f"Images requested from {request.remote}")
     output_dir = os.path.join(WEBROOT, "output")
     images = []
 
@@ -77,7 +65,7 @@ async def get_images(request):
                 # Open image to get dimensions and metadata
                 with Image.open(file) as img:
                     width, height = img.size
-                    metadata = img.text or {}  # Get metadata from image
+                    metadata = img.text or {}
 
                 # Get file stats
                 stats = file.stat()
@@ -123,7 +111,6 @@ async def get_images(request):
 
     logger.info(f"Successfully retrieved {len(images)} images")
     return web.json_response(images)
-
 
 @server.PromptServer.instance.routes.post("/thesis/api/images")
 async def save_image(request):
@@ -176,7 +163,7 @@ async def save_image(request):
 
         logger.info("Adding metadata to image")
         for key, value in metadata_dict.items():
-            if value is not None:  # Only add non-null values
+            if value is not None:
                 metadata.add_text(key, str(value))
 
         # Save image with metadata
@@ -185,8 +172,9 @@ async def save_image(request):
         image.save(image_path, pnginfo=metadata)
 
         relative_path = f"/thesis/output/{image_name}"
-
-        params = (
+        
+        # Store these params for future database integration if needed
+        image_params = (
             image_name,
             len(image_binary),
             image.width,
@@ -200,20 +188,13 @@ async def save_image(request):
             metadata_dict.get("lora"),
             metadata_dict.get("seed"),
         )
-
-        logger.info(f"SQL request with query: {sqlInsert} and params: {params}")
-        # Save image to database
-        image_cursor.execute(
-            sqlInsert,
-            params,
-        )
-        image_db.commit()
+        logger.debug(f"Image parameters prepared: {image_params}")
 
         return web.json_response(
             {
                 "success": True,
                 "message": "Image saved successfully with metadata",
-                "path": f"/thesis/output/{image_name}",
+                "path": relative_path,
             }
         )
 
@@ -221,10 +202,9 @@ async def save_image(request):
         logger.error(f"Error saving image: {str(e)}", exc_info=True)
         return web.json_response({"success": False, "message": str(e)}, status=400)
 
-
 @server.PromptServer.instance.routes.get("/thesis/api/prompts")
 async def get_prompts(request):
-    logger.info("Fetching prompts from workflow file")
+    logger.info(f"Prompts requested from {request.remote}")
     try:
         # Get the workflow file path
         workflow_path = os.path.join(WEBROOT, "prompts", "prompt.json")
@@ -252,71 +232,5 @@ async def get_prompts(request):
     except Exception as e:
         logger.error(f"Error fetching prompts: {str(e)}")
         return web.json_response({"success": False, "message": str(e)}, status=500)
-
-
-@server.PromptServer.instance.routes.get("/thesis/api/image")
-async def get_image(request):
-    try:
-        logger.info("Received request to get image")
-
-        # Get query parameters
-        search_params = {
-            "model": request.query.get("model"),
-            "promptName": request.query.get("prompt"),
-            "steps": int(request.query.get("steps")),  # Convert to integer
-            "sampler": request.query.get("sampler"),
-            "cfgScale": float(request.query.get("cfg_scale")),  # Convert to float
-            "lora": request.query.get("lora"),
-            "width": int(request.query.get("width")),  # Convert to integer
-            "height": int(request.query.get("height")),  # Convert to integer
-            "seed": int(request.query.get("seed")),  # Convert to integer
-        }
-
-        # Remove None values
-        search_params = {k: v for k, v in search_params.items() if v is not None}
-
-        if not search_params:
-            return web.json_response(
-                {"success": False, "message": "No search parameters provided"},
-                status=400,
-            )
-
-        # Build dynamic query
-        conditions = " AND ".join(
-            [f"{k} = %s" for k in search_params.keys()]
-        )  # Change ? to %s
-        values = tuple(search_params.values())
-
-        sql_query = f"SELECT id, filename, path FROM images WHERE {conditions}"
-
-        # Execute query
-        image_cursor.execute(sql_query, values)
-        images = image_cursor.fetchall()
-        image_db.commit()
-
-        if not images:
-            logger.warning(f"No image found matching parameters: {search_params}")
-            return web.json_response(
-                {"success": False, "message": "No matching image found"}, status=404
-            )
-
-        # logger.info(f"Successfully found matching image")
-        logger.info(f"Image found: {images}")
-        return web.json_response(
-            {
-                "success": True,
-                "message": "Image found successfully",
-                "data": {
-                    "id": images[0][0],
-                    "filename": images[0][1],
-                    "path": images[0][2],
-                },
-            }
-        )
-
-    except Exception as e:
-        logger.error(f"Error searching for image: {str(e)}", exc_info=True)
-        return web.json_response({"success": False, "message": str(e)}, status=400)
-
 
 logger.info("Thesis Plugin Loaded Successfully")

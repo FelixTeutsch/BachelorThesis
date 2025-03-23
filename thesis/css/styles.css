@@ -474,7 +474,7 @@ select {
 	flex: 1;
 	height: 50%;
 	width: 100%;
-	/* width: fit-content; */
+	width: fit-content;
 	max-width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;

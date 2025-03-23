@@ -42,9 +42,13 @@ body {
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--c_primary);
+    background-color: var(--c_secondary);
     padding: var(--s_panel_padding_small);
     border-radius: var(--br_medium);
+}
+
+.prompt:has(.selected) {
+    background-color: var(--c_primary);
 }
 
 .prompt .weight {

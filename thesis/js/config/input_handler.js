@@ -1,7 +1,8 @@
-import { hideNotification, showNotification } from '../utils/notification.js';
+import { hideNotification, showNotification, NotificationType } from '../utils/notification.js';
 
+let selected = document.getElementsByClassName('selected')[0];
+const seed = document.getElementById('new-seed');
 class InputHandler {
-
     constructor() {
         console.log("InputHandler constructor");
         this.keyBindings = new Map();
@@ -12,76 +13,61 @@ class InputHandler {
     initializeKeyBindings() {
         // Reduce
         this.addKeyBinding('ArrowUp', () => {
-            console.log(`Increase`);
+            console.log('Increase');
+            if (selected) {
+                selected.setAttribute('value', parseInt(selected.getAttribute('value')) + 1);
+                console.log('Increased value to:', selected.getAttribute('value'));
+            } else
+                showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
+
         });
 
 
         // Increase
         this.addKeyBinding('ArrowDown', () => {
-            console.log(`Reduce`);
+            console.log('Reduce');
+            if (selected) {
+                selected.setAttribute('value', Math.max(parseInt(selected.getAttribute('value')) - 1, 0));
+                console.log('Increased value to:', selected.getAttribute('value'));
+            } else
+                showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
+
+
         });
 
-        // Select Model
-        this.addKeyBinding('m', () => {
-            console.log(`Select Model`);
-            this.updateSelectedItem(document.getElementById('model-module'));
+        // Select Prompt 1
+        this.addKeyBinding('1', () => {
+            console.log('Select Prompt 1');
+            this.updateSelectedItem('prompt-1');
         });
 
-        // Select Prompt
-        this.addKeyBinding('p', () => {
-            console.log(`Select Prompt`);
-            this.updateSelectedItem(document.getElementById('prompt-module'));
+        // Select Prompt 2
+        this.addKeyBinding('2', () => {
+            console.log('Select Prompt 2');
+            this.updateSelectedItem('prompt-2');
         });
 
-        // Select Steps
-        this.addKeyBinding('s', () => {
-            console.log(`Select Steps`);
-            this.updateSelectedItem(document.getElementById('steps-module'));
+        // Select Prompt 3
+        this.addKeyBinding('3', () => {
+            console.log('Select Prompt 3');
+            this.updateSelectedItem('prompt-3');
         });
 
-        // Select Sampler
-        this.addKeyBinding('x', () => {
-            console.log(`Select Sampler`);
-            this.updateSelectedItem(document.getElementById('sampler-module'));
-        });
-
-        // Select CFG Scale
-        this.addKeyBinding('c', () => {
-            console.log(`Select CFG Scale`);
-            this.updateSelectedItem(document.getElementById('gfc-scale-module'));
-        });
-
-        // Select Lora
-        this.addKeyBinding('l', () => {
-            console.log(`Select Lora`);
-            this.updateSelectedItem(document.getElementById('lora-module'));
-        });
-
-        // Select Size
-        this.addKeyBinding('z', () => {
-            console.log(`Select Size`);
-            this.updateSelectedItem(document.getElementById('size-module'));
-        });
-
-        // Select Seed
-        this.addKeyBinding('y', () => {
-            console.log(`Select Seed`);
-            this.updateSelectedItem(document.getElementById('seed-module'));
-        });
-
-        // Generate
+        // New Seed
         this.addKeyBinding('g', () => {
-            console.log(`Generate`);
+            console.log('Generate new seed');
+            seed.click();
         });
 
         this.addKeyBinding('Escape', () => {
-            console.log(`Escape`);
+            console.log('Escape');
             if (hideNotification()) {
                 console.log("Notification closed");
             } else {
                 Array.from(document.getElementsByClassName('selected')).forEach(selectedElement => {
                     selectedElement.classList.remove('selected');
                 });
+                selected = null;
                 console.log("Selected elements cleared");
             }
         });
@@ -105,12 +91,17 @@ class InputHandler {
         }
     }
 
-    updateSelectedItem(item) {
-        if (this.selectedItem) {
-            this.selectedItem.classList.remove('selected');
+    updateSelectedItem(id) {
+        // remove ID
+        if (selected)
+            selected.classList.remove('selected');
+        // Get element by id id
+        selected = document.getElementById(id);
+        if (!selected) {
+            showNotification('Invalid ID', `Element with ID ${id} not found`, NotificationType.ERROR);
+            return;
         }
-        this.selectedItem = item;
-        item.classList.add('selected');
+        selected.classList.add('selected');
     }
 
     initialize() {

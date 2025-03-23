@@ -176,7 +176,7 @@ import { getPrompt } from './utils/TextUtils.js';
         }
 
         // Queue next generation
-        // promptTimeout = setTimeout(checkPrompt, 1000);
+        promptTimeout = setTimeout(checkPrompt, 1000);
     }
 
     // Initialize the input handler

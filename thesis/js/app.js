@@ -89,52 +89,41 @@ import { getPrompt } from './utils/TextUtils.js';
     }, {});
 
     const saveInputValues = function () {
-        console.log("reloadInputValues - START");
         console.log("Input values:", inputValues);
         inputValues['seed'].value = document.getElementById('seed').value;
         inputValues['prompt'].value = getPrompt();
-        console.log("reloadInputValues - END", inputValues);
         return inputValues;
     };
 
     const inputValuesChanged = function () {
-        console.log("inputValuesChanged - START");
 
 
         const result = inputValues['seed'].value !== document.getElementById('seed').value || inputValues['prompt'].value !== getPrompt()
         //  result = Object.keys(inputValues).some(key => inputValues[key].value !== inputValues[key].ref.value);
 
-        console.log("inputValuesChanged - END", result);
         return result;
     };
 
     const cacheInputValues = function () {
-        console.log("cacheInputValues - START");
         Object.keys(inputValues).forEach(key => {
             inputValues[key].cache = inputValues[key].value;
         });
-        console.log("cacheInputValues - END", inputValues);
         return inputValues;
     };
 
     const chachedValuesExecuted = function () {
-        console.log("chachedValuesExecuted - START");
         const result = Object.keys(inputValues).some(key => inputValues[key].cache !== inputValues[key].lastExecutedInput);
-        console.log("chachedValuesExecuted - END", result);
         return result;
     };
 
     const setLastExecuted = function () {
-        console.log("setLastExecuted - START");
         Object.keys(inputValues).forEach(key => {
             inputValues[key].lastExecutedInput = inputValues[key].cache;
         });
-        console.log("setLastExecuted - END", inputValues);
         return inputValues;
     };
 
     const updateWorkflow = function () {
-        console.log("updateWorkflow - START");
         Object.keys(inputValues).forEach(key => {
             const workflowPath = inputValues[key].workflow;
             let value = inputValues[key].cache;
@@ -150,7 +139,6 @@ import { getPrompt } from './utils/TextUtils.js';
                 workflow[workflowPath[0]][workflowPath[1]] = value;
             }
         });
-        console.log("updateWorkflow - END", workflow);
     };
 
     inputValues.seed.ref.value = workflow["3"]["inputs"]["seed"];

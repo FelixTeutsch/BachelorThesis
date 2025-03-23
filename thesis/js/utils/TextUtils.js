@@ -114,13 +114,11 @@ export const formatSamplerDescription = (samplerId) => {
 
 export const getPrompt = () => {
     const promptElements = document.getElementsByClassName('prompt');
-    console.log('Prompts collected:', promptElements);
     if (promptElements.length === 0) return '';
     const finalPrompt = Array.from(promptElements).map(
         promptElement => promptElement.getElementsByClassName('prompt-text')[0].innerText
             + ':'
             + promptElement.getElementsByClassName('weight')[0].value
     ).join(', ');
-    console.log('Final prompt:', finalPrompt);
     return finalPrompt;
 };

@@ -3,6 +3,7 @@ import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
 import { getPrompt } from './utils/TextUtils.js';
+import { addEntry } from './utils/history.js';
 
 (async (window, document, undefined) => {
     // UUID generator
@@ -23,6 +24,7 @@ import { getPrompt } from './utils/TextUtils.js';
         }
     }
     const workflow = await loadWorkflow();
+    console.log("Workflow: ", workflow);
 
     // Websocket connection
     const server_address = window.location.hostname + ':' + window.location.port;
@@ -58,8 +60,6 @@ import { getPrompt } from './utils/TextUtils.js';
                 }
                 throw new Error(`${errorMessage}`);
             }
-
-            console.log("Prompt was queued:", response);
         } catch (error) {
             console.error("Error queuing prompt:", error);
             showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
@@ -120,6 +120,9 @@ import { getPrompt } from './utils/TextUtils.js';
         Object.keys(inputValues).forEach(key => {
             inputValues[key].lastExecutedInput = inputValues[key].cache;
         });
+        const prompt = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
+        const seed = inputValues['seed'].lastExecutedInput;
+        addEntry(prompt[0], prompt[1], prompt[2], seed);
         return inputValues;
     };
 

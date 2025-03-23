@@ -22,6 +22,7 @@
 		<link rel="stylesheet" href="/thesis/css/styles.css">
 		<link rel="stylesheet" href="/thesis/css/prompt-modification.css">
 		<link rel="stylesheet" href="/thesis/css/notification.css">
+		<link rel="stylesheet" href="/thesis/css/undo-redo.css">
 	</head>
 
 	<body class="theme">
@@ -63,6 +64,12 @@
 					<div class="progress-text">0%</div>
 				</div>
 			</div>
+
+			<!-- BUTTONS -->
+			<div id="button-area">
+				<button id="undo" class="material-symbols-rounded" disabled title="undo"> undo </button>
+				<button id="redo" class="material-symbols-rounded" disabled title="redo"> redo </button>
+			</div>
 		</div>
 
 		<img src="" alt="The generated image" id="output-image">
@@ -87,8 +94,9 @@
 		<script type="module" src="/thesis/js/progress.js"></script>
 		<script type="module" src="/thesis/js/config/save.js"></script>
 		<script type="module" src="/thesis/js/config/restart.js"></script>
-		<script type="module" src="/thesis/js/app.js"></script>
 		<script type="module" src="/thesis/js/utils/notification.js"></script>
+		<script type="module" src="/thesis/js/utils/history.js"></script>
+		<script type="module" src="/thesis/js/app.js"></script>
 
 		<script>
 			document.getElementById("new-seed")

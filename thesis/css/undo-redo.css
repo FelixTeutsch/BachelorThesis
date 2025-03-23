@@ -1,0 +1,40 @@
+#button-area {
+    display: flex;
+    justify-content: center;
+    gap: var(--s_slider_gap);
+}
+
+#button-area button {
+    background-color: var(--c_primary);
+    border: none;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--br_medium);
+    box-shadow: var(--sh_input_select);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+#button-area button:hover:not(:disabled) {
+    background-color: var(--c_secondary);
+    color: var(--c_text);
+    transform: scale(1.05);
+}
+
+#button-area button:active:not(:disabled) {
+    opacity: 0.5;
+    background-color: var(--c_primary);
+    transform: scale(0.95);
+}
+
+#button-area button:disabled {
+    background-color: var(--c_background);
+    color: var(--c_text);
+    box-shadow: none;
+    cursor: default;
+}

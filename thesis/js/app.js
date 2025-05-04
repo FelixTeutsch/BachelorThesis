@@ -117,12 +117,14 @@ import { addEntry } from './utils/history.js';
     };
 
     const setLastExecuted = function () {
+        if (inputValues['prompt'].lastExecutedInput != null) {
+            const prompt = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
+            const seed = inputValues['seed'].lastExecutedInput;
+            addEntry(prompt[0], prompt[1], prompt[2], seed);
+        }
         Object.keys(inputValues).forEach(key => {
             inputValues[key].lastExecutedInput = inputValues[key].cache;
         });
-        const prompt = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
-        const seed = inputValues['seed'].lastExecutedInput;
-        addEntry(prompt[0], prompt[1], prompt[2], seed);
         return inputValues;
     };
 

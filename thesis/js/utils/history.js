@@ -10,6 +10,7 @@ const redoButton = document.getElementById('redo');
 
 let historyArray = [];
 let undoElementsArray = [];
+let currentPrompt = null;
 
 undoButton.addEventListener('click', () => {
     if (!undoButton.hasAttribute('disabled')) {
@@ -24,16 +25,21 @@ redoButton.addEventListener('click', () => {
 });
 
 export const addEntry = (prompt1, prompt2, prompt3, seed) => {
+    if (currentPrompt !== null) {
+        historyArray.push(currentPrompt);
+
+    }
     let entry = {
         prompt1: prompt1,
         prompt2: prompt2,
         prompt3: prompt3,
         seed: seed
     }
-    historyArray.push(entry);
+
+    currentPrompt = entry;
     undoElementsArray = [];
 
-    undoRedo(false, true);
+    undoRedo(historyArray.length > 0, true);
 }
 
 export const undo = () => {
@@ -42,8 +48,10 @@ export const undo = () => {
 
         applyElements(entry);
 
-        undoElementsArray.push(entry);
-        undoRedo(historyArray.length <= 0, false);
+        if (currentPrompt != null)
+            undoElementsArray.push(currentPrompt);
+        currentPrompt = entry;
+        undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
     } else {
         console.log('Nothing to undo');
         showNotification('Nothing to undo', 'There are no more actions to undo!', NotificationType.WARNING);
@@ -55,10 +63,11 @@ export const redo = () => {
         const entry = undoElementsArray.pop();
 
         applyElements(entry);
+        if (currentPrompt != null)
+            historyArray.push(currentPrompt);
+        currentPrompt = entry;
 
-        historyArray.push(entry);
-
-        undoRedo(false, undoElementsArray.length <= 0);
+        undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
     } else {
         console.log('Nothing to redo');
         showNotification('Nothing to redo', 'There are no more actions to redo!', NotificationType.WARNING);

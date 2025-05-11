@@ -53,7 +53,6 @@ export const undo = () => {
         currentPrompt = entry;
         undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
     } else {
-        console.log('Nothing to undo');
         showNotification('Nothing to undo', 'There are no more actions to undo!', NotificationType.WARNING);
     }
 }
@@ -69,7 +68,6 @@ export const redo = () => {
 
         undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
     } else {
-        console.log('Nothing to redo');
         showNotification('Nothing to redo', 'There are no more actions to redo!', NotificationType.WARNING);
     }
 }

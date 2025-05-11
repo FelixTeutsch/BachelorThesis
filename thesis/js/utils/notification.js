@@ -45,7 +45,6 @@ export const NotificationType = {
 export const showNotification = (title, message, type = NotificationType.SUCCESS) => {
     notification_wrapper.classList.remove('hidden');
 
-    console.log('Notification Type:', type.name.toLowerCase());
     notification.className = ''; // clear all classes
     notification.classList.add(type.name.toLowerCase());
     notificationTitle.textContent = title;
@@ -60,7 +59,6 @@ export const showNotification = (title, message, type = NotificationType.SUCCESS
 }
 
 export const hideNotification = () => {
-    console.log('Notification Hidden:', notification_wrapper.classList.contains('hidden'));
     if (notification_wrapper.classList.contains('hidden')) return false;
     notification_wrapper.classList.add('hidden');
     clearTimeout(notificationTimeout);

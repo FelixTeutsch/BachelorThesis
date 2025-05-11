@@ -58,59 +58,6 @@ export const truncateString = (str, maxLength = 50) =>
 export const sanitizeString = (str) =>
     str?.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, ' ') || '';
 
-/**
- * Formats sampler information into a readable tooltip description
- * @param {string} samplerId - The ID of the sampler
- * @returns {string} Formatted description
- */
-export const formatSamplerDescription = (samplerId) => {
-    // Special characteristics to check
-    const isAncestral = samplerId.toLowerCase().includes('ancestral') || samplerId.toLowerCase().includes('_a');
-    const isGPU = samplerId.toLowerCase().includes('gpu');
-    const isSDE = samplerId.toLowerCase().includes('sde');
-    const isDPM = samplerId.toLowerCase().includes('dpm');
-    const isUniPC = samplerId.toLowerCase().includes('uni_pc');
-    const isLCM = samplerId.toLowerCase().includes('lcm');
-
-    // Base name formatting with icon
-    let mainIcon = '🎨'; // Default icon
-    if (isDPM) mainIcon = '🔄';
-    if (isUniPC) mainIcon = '🎯';
-    if (isLCM) mainIcon = '⚡';
-
-    // Remove special keywords from the name
-    let cleanName = samplerId
-        .replace(/gpu/gi, '')
-        .replace(/sde/gi, '')
-        .replace(/ancestral/gi, '')
-        .replace(/_a\b/gi, '')  // Remove _a when it's at a word boundary
-        .replace(/__+/g, '_')   // Clean up multiple underscores
-        .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
-
-    const readableName = cleanName
-        .split('_')
-        .map(word => {
-            // Special cases that should be fully capitalized
-            const upperCaseWords = ['lms', 'dpm', 'ddim', 'plms'];
-            if (upperCaseWords.includes(word.toLowerCase()) ||
-                word.toLowerCase().startsWith('dpm')) {
-                return word.toUpperCase();
-            }
-            return beautifyFilename(word);
-        })
-        .join(' ')
-        .trim();
-
-    let description = [`${mainIcon} ${readableName}`];
-
-    // Add special characteristics icons
-    if (isAncestral) description.push(" 🎲");
-    if (isGPU) description.push(" 💻");
-    if (isSDE) description.push(" 📊");
-
-    // Return formatted description
-    return description.join('');  // Changed to empty string to keep all on one line
-};
 
 export const getPrompt = () => {
     const promptElements = document.getElementsByClassName('prompt');

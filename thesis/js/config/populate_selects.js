@@ -1,4 +1,4 @@
-import { beautifyFilename, formatSamplerDescription } from '/thesis/js/utils/TextUtils.js';
+import { beautifyFilename } from '/thesis/js/utils/TextUtils.js';
 
 export async function loadModels() {
     try {

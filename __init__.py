@@ -1,22 +1,27 @@
-import os
-import server
-from aiohttp import web
-import json
-from pathlib import Path
-from PIL import Image
-import base64
-from datetime import datetime
-import logging
-import sys
-import subprocess
-import asyncio
-from PIL.PngImagePlugin import PngInfo
-import io
-import mysql.connector
-from dotenv import load_dotenv
+"""
+Thesis Project - AI Image Generation Interface for ComfyUI
+This module provides a web interface for generating AI images using ComfyUI.
 
-# Load environment variables
-load_dotenv()
+Author: Felix Teutsch
+"""
+
+# Standard library imports
+import os
+import json
+import io
+import base64
+import logging
+from pathlib import Path
+from datetime import datetime
+
+# Third-party imports
+from aiohttp import web
+from PIL import Image
+from PIL.PngImagePlugin import PngInfo
+
+# Local imports
+import server
+
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -45,23 +50,23 @@ server.PromptServer.instance.routes.static(
     "/thesis/output/", path=os.path.join(WEBROOT, "output")
 )
 
+
 @server.PromptServer.instance.routes.get("/thesis")
 def get_ui(request):
-    logger.info(f"UI requested from {request.remote}")
+    # No need to log every UI request
     return web.FileResponse(os.path.join(WEBROOT, "index.html"))
 
 
 # Add new endpoint to get images
 @server.PromptServer.instance.routes.get("/thesis/api/images")
 async def get_images(request):
-    logger.info(f"Images requested from {request.remote}")
     output_dir = os.path.join(WEBROOT, "output")
     images = []
 
     for file in Path(output_dir).glob("*"):
         if file.suffix.lower() in [".png", ".jpg", ".jpeg", ".gif"]:
             try:
-                logger.debug(f"Processing image: {file.name}")
+                # Process image
                 # Open image to get dimensions and metadata
                 with Image.open(file) as img:
                     width, height = img.size
@@ -109,30 +114,25 @@ async def get_images(request):
     # Convert ISO strings to datetime objects for comparison
     images.sort(key=lambda x: datetime.fromisoformat(x["createdAt"]), reverse=True)
 
-    logger.info(f"Successfully retrieved {len(images)} images")
     return web.json_response(images)
+
 
 @server.PromptServer.instance.routes.post("/thesis/api/images")
 async def save_image(request):
     try:
-        logger.info("Received request to save new image")
         data = await request.json()
-
         image_name = data.get("imageName")
-        logger.info(f"Processing image: {image_name}")
 
         # Ensure output directory exists
         output_dir = os.path.join(WEBROOT, "output")
         os.makedirs(output_dir, exist_ok=True)
 
         # Decode base64 image
-        logger.info("Decoding image data")
         image_data = data.get("imageData")
 
         # Handle base64 encoded image data
         image_binary = None
         try:
-            logger.info("Processing base64 image data")
             if "data:image/png;base64," in image_data:
                 # Remove data URI prefix
                 base64_data = image_data.replace("data:image/png;base64,", "")
@@ -140,18 +140,11 @@ async def save_image(request):
                 base64_data = image_data
 
             image_binary = base64.b64decode(base64_data)
-            logger.info(
-                f"Successfully decoded base64 image data, size: {len(image_binary)} bytes"
-            )
         except Exception as e:
             logger.error(f"Error decoding base64 image data: {str(e)}")
             raise
 
-        logger.info(
-            f"Image Binary processed successfully: {image_data[:30]}..."
-            if len(image_data) > 30
-            else image_data
-        )
+        # Image processing complete
 
         # Create image and add metadata
         image = Image.open(io.BytesIO(image_binary))
@@ -161,18 +154,16 @@ async def save_image(request):
         metadata_dict = data.get("metadata", {})
         metadata_dict["createdAt"] = datetime.now().isoformat()
 
-        logger.info("Adding metadata to image")
         for key, value in metadata_dict.items():
             if value is not None:
                 metadata.add_text(key, str(value))
 
         # Save image with metadata
         image_path = os.path.join(output_dir, image_name)
-        logger.info(f"Saving image with metadata to: {image_path}")
         image.save(image_path, pnginfo=metadata)
 
         relative_path = f"/thesis/output/{image_name}"
-        
+
         # Store these params for future database integration if needed
         image_params = (
             image_name,
@@ -188,8 +179,6 @@ async def save_image(request):
             metadata_dict.get("lora"),
             metadata_dict.get("seed"),
         )
-        logger.debug(f"Image parameters prepared: {image_params}")
-
         return web.json_response(
             {
                 "success": True,
@@ -202,16 +191,15 @@ async def save_image(request):
         logger.error(f"Error saving image: {str(e)}", exc_info=True)
         return web.json_response({"success": False, "message": str(e)}, status=400)
 
+
 @server.PromptServer.instance.routes.get("/thesis/api/prompts")
 async def get_prompts(request):
-    logger.info(f"Prompts requested from {request.remote}")
     try:
         # Get the workflow file path
         workflow_path = os.path.join(WEBROOT, "prompts", "prompt.json")
 
         # Check if file exists
         if not os.path.exists(workflow_path):
-            logger.warning(f"Prompt file not found at: {workflow_path}")
             return web.json_response(
                 {"success": False, "message": "Prompt file not found"}, status=404
             )
@@ -220,7 +208,6 @@ async def get_prompts(request):
         with open(workflow_path, "r", encoding="utf-8") as file:
             prompts = json.load(file)
 
-        logger.info(f"Successfully loaded prompts")
         return web.json_response(prompts)
 
     except json.JSONDecodeError as e:
@@ -233,4 +220,6 @@ async def get_prompts(request):
         logger.error(f"Error fetching prompts: {str(e)}")
         return web.json_response({"success": False, "message": str(e)}, status=500)
 
+
+# Only log once at startup
 logger.info("Thesis Plugin Loaded Successfully")

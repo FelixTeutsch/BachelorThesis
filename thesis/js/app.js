@@ -1,3 +1,4 @@
+// Main Application JavaScript for Thesis UI - Controls image generation interface
 import { loadModels, loadPrompts } from './config/populate_selects.js';
 import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
@@ -28,7 +29,9 @@ import { addEntry } from './utils/history.js';
     // Websocket connection
     const server_address = window.location.hostname + ':' + window.location.port;
     const socket = new WebSocket('ws://' + server_address + '/ws?clientId=' + client_id);
-    socket.addEventListener('open', (event) => { console.log("Websocket connection established"); });
+    socket.addEventListener('open', (event) => {
+        // Websocket connection established
+    });
 
     const generationOutput = document.getElementById("output-image");
 
@@ -40,7 +43,6 @@ import { addEntry } from './utils/history.js';
     async function initializePrompts() {
         try {
             prompts = await loadPrompts();
-            console.log("Prompts loaded:", prompts);
         } catch (error) {
             console.error("Error loading prompts:", error);
             showNotification('Error', `Failed to load prompts: ${error.message}`, NotificationType.ERROR);
@@ -54,8 +56,6 @@ import { addEntry } from './utils/history.js';
         const data = { 'prompt': prompt, 'client_id': client_id };
 
         try {
-            console.log("Queuing prompt:", data);
-
             const response = await fetch('/prompt', {
                 method: 'POST',
                 cache: 'no-cache',
@@ -81,7 +81,6 @@ import { addEntry } from './utils/history.js';
             console.error("Error queuing prompt:", error);
             showNotification('Error', `Failed to queue prompt: ${error.message}`, NotificationType.ERROR);
         }
-        // }
     }
 
     const inputReferences = [
@@ -109,7 +108,6 @@ import { addEntry } from './utils/history.js';
     }, {});
 
     const saveInputValues = function () {
-        console.log("Input values:", inputValues);
         inputValues['seed'].value = document.getElementById('seed').value;
         inputValues['prompt'].value = getPrompt();
         inputValues['model'].value = document.getElementById('model').value;
@@ -119,10 +117,9 @@ import { addEntry } from './utils/history.js';
     const inputValuesChanged = function () {
 
 
-        const result = inputValues['seed'].value !== document.getElementById('seed').value || inputValues['prompt'].value !== getPrompt() || inputValues['model'].value !== document.getElementById('model').value;
-        //  result = Object.keys(inputValues).some(key => inputValues[key].value !== inputValues[key].ref.value);
-
-        return result;
+        return inputValues['seed'].value !== document.getElementById('seed').value ||
+            inputValues['prompt'].value !== getPrompt() ||
+            inputValues['model'].value !== document.getElementById('model').value;
     };
 
     const cacheInputValues = function () {
@@ -204,7 +201,6 @@ import { addEntry } from './utils/history.js';
                 const label = this.nextElementSibling;
                 label.classList.add("selected");
                 inputValues.size.ref.value = this.value;
-                console.log("Resolution changed to:", this.value);
             }
         });
     });
@@ -214,12 +210,9 @@ import { addEntry } from './utils/history.js';
     document.getElementById('prompt-select').addEventListener('change', async function () {
         const output = document.getElementsByClassName('prompt-text');
         const selectedPromptName = this.value;
-        console.log("Selected prompt:", selectedPromptName);
-        console.log("Prompts:", prompts);
 
         if (selectedPromptName && prompts[selectedPromptName]) {
             const selectedPrompt = prompts[selectedPromptName];
-            console.log("Selected prompt data:", selectedPrompt);
 
             const promptParts = selectedPrompt.prompt.split(',');
 
@@ -250,17 +243,15 @@ import { addEntry } from './utils/history.js';
         }
         switch (data.type) {
             case 'statusfe':
-                console.log("Current status\nQueues remaining:", data.data.status.exec_info.queue_remaining);
                 if (data.data.status.exec_info.queue_remaining > 0) {
                     resetProgress();
                 }
                 break;
             case 'executing':
-                console.log("Currently executing\nPromptID:", data.data.prompt_id, "\nCurrent node:", data.data.node);
+                // Currently executing
                 break;
             case 'executed':
                 finishProgress();
-                console.log("Completed execution\nPromptID:", data.data.prompt_id, "\nTimestamp:", new Date(data.data.timestamp).toLocaleString());
                 if ('images' in data['data']['output']) {
                     const image = data['data']['output']['images'][0];
                     const filename = image['filename']
@@ -272,33 +263,25 @@ import { addEntry } from './utils/history.js';
 
                 break;
             case 'progress':
-                console.log("Progress:", data.data.value, "of", data.data.max);
                 updateProgress(data.data.value, data.data.max);
                 break;
             case 'execution_start':
-                console.log("Started execution\nPromptID:", data.data.prompt_id, "\nTimestamp:", new Date(data.data.timestamp).toLocaleString());
+                // Execution started
                 break;
             case 'execution_cached':
-                console.log("Cached execution\nPromptID:", data.data.prompt_id, "\nTimestamp:", new Date(data.data.timestamp).toLocaleString());
+                // Execution cached
                 break;
             case 'execution_error':
                 const errorData = data.data;
-                const errorMessage = 'Execution error:' +
-                    '\n\nPrompt ID: ' + errorData.prompt_id +
-                    '\n\nNode ID: ' + errorData.node_id +
-                    '\n\nNode Type: ' + errorData.node_type +
-                    '\n\nException Message: ' + errorData.exception_message +
-                    '\n\nException Type: ' + errorData.exception_type +
-                    '\n\nTraceback: ' + errorData.traceback.join('\n') +
-                    '\n\nTimestamp: ' + new Date(errorData.timestamp).toLocaleString();
-                console.error(errorMessage);
+                // Log error details to console for debugging
+                console.error(`Execution error in prompt ${errorData.prompt_id}: ${errorData.exception_message}`);
                 showNotification(errorData.exception_type, `An error occurred during execution: ${data.data.exception_message}`, NotificationType.ERROR);
                 break;
             case 'execution_success':
-                console.log("Completed execution\nPromptID:", data.data.prompt_id, "\nTimestamp:", new Date(data.data.timestamp).toLocaleString());
+                // Execution completed successfully
                 break;
             default:
-                console.log("Unknown message type:", data.type);
+                // Unknown message type
                 break;
         }
     });

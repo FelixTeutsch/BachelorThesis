@@ -1,4 +1,4 @@
-import { loadModels, loadLoras, loadPrompts, loadSamplers } from './config/populate_selects.js';
+import { loadModels, loadPrompts } from './config/populate_selects.js';
 import InputHandler from './config/input_handler.js';
 import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
@@ -24,7 +24,6 @@ import { addEntry } from './utils/history.js';
         }
     }
     const workflow = await loadWorkflow();
-    console.log("Workflow: ", workflow);
 
     // Websocket connection
     const server_address = window.location.hostname + ':' + window.location.port;
@@ -32,6 +31,24 @@ import { addEntry } from './utils/history.js';
     socket.addEventListener('open', (event) => { console.log("Websocket connection established"); });
 
     const generationOutput = document.getElementById("output-image");
+
+    // Populate model and prompt selects
+    loadModels();
+    let prompts = {}; // Initialize as empty object
+
+    // Load prompts asynchronously
+    async function initializePrompts() {
+        try {
+            prompts = await loadPrompts();
+            console.log("Prompts loaded:", prompts);
+        } catch (error) {
+            console.error("Error loading prompts:", error);
+            showNotification('Error', `Failed to load prompts: ${error.message}`, NotificationType.ERROR);
+        }
+    }
+
+    // Initialize prompts
+    await initializePrompts();
 
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
@@ -74,6 +91,9 @@ import { addEntry } from './utils/history.js';
         }, {
             workflow: [["3"], ["inputs"], ["seed"]],
             reference: document.getElementById('seed'),
+        }, {
+            workflow: [["4"], ["inputs"], ["ckpt_name"]],
+            reference: document.getElementById('model'),
         },
     ];
 
@@ -92,13 +112,14 @@ import { addEntry } from './utils/history.js';
         console.log("Input values:", inputValues);
         inputValues['seed'].value = document.getElementById('seed').value;
         inputValues['prompt'].value = getPrompt();
+        inputValues['model'].value = document.getElementById('model').value;
         return inputValues;
     };
 
     const inputValuesChanged = function () {
 
 
-        const result = inputValues['seed'].value !== document.getElementById('seed').value || inputValues['prompt'].value !== getPrompt()
+        const result = inputValues['seed'].value !== document.getElementById('seed').value || inputValues['prompt'].value !== getPrompt() || inputValues['model'].value !== document.getElementById('model').value;
         //  result = Object.keys(inputValues).some(key => inputValues[key].value !== inputValues[key].ref.value);
 
         return result;
@@ -190,7 +211,28 @@ import { addEntry } from './utils/history.js';
 
     let promptTimeout = setTimeout(checkPrompt, 1000);
 
+    document.getElementById('prompt-select').addEventListener('change', async function () {
+        const output = document.getElementsByClassName('prompt-text');
+        const selectedPromptName = this.value;
+        console.log("Selected prompt:", selectedPromptName);
+        console.log("Prompts:", prompts);
 
+        if (selectedPromptName && prompts[selectedPromptName]) {
+            const selectedPrompt = prompts[selectedPromptName];
+            console.log("Selected prompt data:", selectedPrompt);
+
+            const promptParts = selectedPrompt.prompt.split(',');
+
+            for (let i = 0; i < output.length; i++) {
+                output[i].innerHTML = promptParts[i];
+            }
+
+            document.getElementById('negative-prompt').value = selectedPrompt.negative_prompt;
+
+        } else {
+            console.warn('Selected prompt not found in prompts data');
+        }
+    });
 
     // Websocket message handler
     socket.addEventListener('message', async (event) => {

@@ -28,6 +28,9 @@ body {
     max-width: 400px;
     z-index: 999;
     box-shadow: var(--sh_panel);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s_body_padding);
 }
 
 #prompt {
@@ -83,9 +86,8 @@ input[type=number] {
     flex-direction: row;
     gap: var(--s_label_gap);
     align-items: center;
-    /*TODO: fix alignment*/
     justify-content: center;
-    margin-top: var(--s_body_padding);
+    /* margin-top: var(--s_body_padding); */
     opacity: .75;
     background-color: var(--c_background);
     padding: 2px 8px;
@@ -94,13 +96,16 @@ input[type=number] {
 }
 
 #seed-area #seed {
-    width: 150px;
     height: fit-content;
     box-shadow: none;
     text-align: left;
     padding: 0;
     padding-right: 2rem;
     margin: 0;
+}
+
+#seed {
+    width: 100%;
 }
 
 #seed-area #new-seed {

@@ -28,6 +28,20 @@
 	<body class="theme">
 		<!---------------- Settings ---------------->
 		<div id="parameter-area">
+			<!-- MODEL -->
+			<div id="model-area">
+				<select name="model" id="model" aria-placeholder="Model" placeholder="Model">
+					<option value="" disabled selected>Select your model</option>
+				</select>
+			</div>
+
+			<!-- PROMPT SELECT -->
+			<div id="prompt-select-area">
+				<select name="prompt-select" id="prompt-select" aria-placeholder="prompt-select" placeholder="prompt-select">
+					<option value="" disabled selected>Select your prompt</option>
+				</select>
+			</div>
+
 			<!-- PROMPT -->
 			<div id="prompt">
 				<div class="prompt">
@@ -49,6 +63,10 @@
 					<input type="number" name="weight" class="weight" value="5" min="1" max="100" id="prompt-3">
 				</div>
 			</div>
+
+			<!-- NEGATIVE PROMPT -->
+			<input type="hidden" name="negative-prompt" id="negative-prompt"
+					value="text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username">
 
 			<!-- SEED -->
 			<div id="seed-area">
@@ -96,6 +114,7 @@
 		<script type="module" src="/thesis/js/config/restart.js"></script>
 		<script type="module" src="/thesis/js/utils/notification.js"></script>
 		<script type="module" src="/thesis/js/utils/history.js"></script>
+		<script type="module" src="/thesis/js/config/populate_selects.js"></script>
 		<script type="module" src="/thesis/js/app.js"></script>
 
 		<script>
@@ -108,6 +127,20 @@
 			function randomSeed() {
 				return Math.floor(Math.random() * 1000000000000000);
 			}
+
+			document.getElementById("prompt-select")
+				.addEventListener("change", (event) => {
+					const selectedPrompt = event.target.value;
+					const promptElements = document.querySelectorAll(".prompt");
+					promptElements.forEach((promptElement) => {
+						if(promptElement.querySelector(".prompt-text")
+							.innerText === selectedPrompt) {
+							promptElement.classList.add("selected");
+						} else {
+							promptElement.classList.remove("selected");
+						}
+					});
+				});
 		</script>
 	</body>
 

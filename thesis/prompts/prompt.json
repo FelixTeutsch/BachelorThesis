@@ -1,22 +1,54 @@
 {
-	"Anime Woman": {
-		"positive": "stunning digital illustration of a 20yo girl showing her back to camera, posing, long hair, alluring, sultry facial expression, natural colors, ultra detailed, 4k, unforgettable, very intricate, niji style, comics style, anime style",
-		"negative": "low quality, blurry, plastic, grainy, duplicate, [deformed | disfigured] , poorly drawn, [bad : wrong] anatomy, [extra | missing | floating | disconnected] limb, bad proportions, (mutated hands and fingers) , text, name, signature, watermark, logo, autograph, trademark, worst quality, jpeg artifacts, cut off, censored, bad anatomy, bad body, bad face, deformities, (boring, uninteresting:1.1)"
+	"🏠 House-Dog-Cat": {
+		"prompt": "House,Dog,Cat",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
-	"Realistic Woman": {
-		"positive": "a woman with freckles looks out into the world, in the style of vray, white and orange, warmcore, photobash, strong facial expression, photo, fawncore --ar 127:128 --s 750 --v 5.2",
-		"negative": "low quality, blurry, plastic, grainy, duplicate, [deformed | disfigured] , poorly drawn, [bad : wrong] anatomy, [extra | missing | floating | disconnected] limb, bad proportions, (mutated hands and fingers) , text, name, signature, watermark, logo, autograph, trademark, worst quality, jpeg artifacts, cut off, censored, bad anatomy, bad body, bad face, deformities, (boring, uninteresting:1.1)"
+	"🌳 Tree-Car-Mountain": {
+		"prompt": "Tree,Car,Hountain",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
-	"Realistic Man": {
-		"positive": "a man with a beard looks out into the world, in the style of vray, white and orange, warmcore, photobash, strong facial expression, photo, fawncore --ar 127:128 --s 750 --v 5.2",
-		"negative": "low quality, blurry, plastic, grainy, duplicate, [deformed | disfigured] , poorly drawn, [bad : wrong] anatomy, [extra | missing | floating | disconnected] limb, bad proportions, (mutated hands and fingers) , text, name, signature, watermark, logo, autograph, trademark, worst quality, jpeg artifacts, cut off, censored, bad anatomy, bad body, bad face, deformities, (boring, uninteresting:1.1)"
+	"☁️ Cloud-Sun-Moon": {
+		"prompt": "Cloud,Sun,Moon",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
-	"Rabbit v1": {
-		"positive": "a rabbit with a red hat, in the style of vray, white and orange, warmcore, photobash, strong facial expression, photo, fawncore --ar 127:128 --s 750 --v 5.2",
-		"negative": "low quality, blurry, plastic, grainy, duplicate, [deformed | disfigured] , poorly drawn, [bad : wrong] anatomy, [extra | missing | floating | disconnected] limb, bad proportions, (mutated hands and fingers) , text, name, signature, watermark, logo, autograph, trademark, worst quality, jpeg artifacts, cut off, censored, bad anatomy, bad body, bad face, deformities, (boring, uninteresting:1.1)"
+	"🍎 Apple-Pie-Table": {
+		"prompt": "Apple,Pie,Table",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
-	"Rabbit v2": {
-		"positive": "close up photo of a rabbit, forest in spring, haze, halation, bloom, dramatic atmosphere, centred, rule of thirds, 200mm 1.4f macro shot",
-		"negative": "low quality, blurry, plastic, grainy, duplicate, [deformed | disfigured] , poorly drawn, [bad : wrong] anatomy, [extra | missing | floating | disconnected] limb, bad proportions, (mutated hands and fingers) , text, name, signature, watermark, logo, autograph, trademark, worst quality, jpeg artifacts, cut off, censored, bad anatomy, bad body, bad face, deformities, (boring, uninteresting:1.1)"
+	"📚 Book-Table-Chair": {
+		"prompt": "Book,Table,Chair",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🚗 Car-Bike-Train": {
+		"prompt": "Car,Bike,Train",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🐠 Fish-Bird-Reptile": {
+		"prompt": "Fish,Bird,Reptile",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🌸 Flower-Grass-Tree": {
+		"prompt": "Flower,Grass,Tree",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🌤️ Sky-Water-Land": {
+		"prompt": "Sky,Water,Land",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🔥 Fire-Wind-Earth": {
+		"prompt": "Fire,Wind,Earth",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"⛰️ Mountain-River-Lake": {
+		"prompt": "Mountain,River,Lake",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"⭐ Star-Planet-Galaxy": {
+		"prompt": "Star,Planet,Galaxy",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
+	},
+	"🌊 Ocean-Beach-Island": {
+		"prompt": "Ocean,Beach,Island",
+		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	}
 }

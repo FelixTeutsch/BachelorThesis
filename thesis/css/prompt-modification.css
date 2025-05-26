@@ -106,6 +106,31 @@ input[type=number] {
 
 #seed {
     width: 100%;
+    background-color: var(--c_background);
+    padding: 4px 8px;
+    color: var(--c_text);
+    font-size: 16px;
+    text-align: center;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* Hide the spinner buttons */
+#seed::-webkit-inner-spin-button,
+#seed::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#seed:focus {
+    outline: none;
+    border-color: var(--c_primary);
+}
+
+#seed-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 #seed-area #new-seed {

@@ -46,8 +46,24 @@ class InputHandler {
         });
 
         // New Seed
-        this.addKeyBinding('g', () => {
+        this.addKeyBinding('r', () => {
             seed.click();
+        });
+
+        // Undo - Arrow Left
+        this.addKeyBinding('ArrowLeft', () => {
+            const undoButton = document.getElementById('undo');
+            if (!undoButton.disabled) {
+                undoButton.click();
+            }
+        });
+
+        // Redo - Arrow Right
+        this.addKeyBinding('ArrowRight', () => {
+            const redoButton = document.getElementById('redo');
+            if (!redoButton.disabled) {
+                redoButton.click();
+            }
         });
 
         this.addKeyBinding('Escape', () => {

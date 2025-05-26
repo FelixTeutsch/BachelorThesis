@@ -106,12 +106,12 @@ const applyElements = (entry) => {
     prompt2.value = entry['prompt2'];
     prompt3.value = entry['prompt3'];
 
-    // For the seed element which might be a div, handle both cases
-    if (seed.tagName.toLowerCase() === 'input') {
-        seed.value = entry['seed'];
-    } else {
-        seed.innerText = entry['seed'];
-    }
+    // Update the seed input value
+    seed.value = entry['seed'];
+
+    // Dispatch a change event to notify that the seed value has changed
+    const changeEvent = new Event('change', { bubbles: true });
+    seed.dispatchEvent(changeEvent);
 }
 
 const undoRedo = (undoEmpty, redoEmpty) => {

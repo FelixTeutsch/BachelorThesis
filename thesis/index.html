@@ -70,9 +70,10 @@
 
 			<!-- SEED -->
 			<div id="seed-area">
-				<span class="material-symbols-rounded"> numbers </span>
-				<div id="seed">961946033861284</div>
-				<span class="material-symbols-rounded" id="new-seed"> shuffle </span>
+				<span class="material-symbols-rounded" title="Seed value"> numbers </span>
+				<input type="number" id="seed" value="961946033861284" min="0" max="9999999999999999" aria-label="Seed value"
+						title="Seed value for generation" />
+				<span class="material-symbols-rounded" id="new-seed" title="Generate new random seed"> shuffle </span>
 			</div>
 
 			<!-- PROGRESS -->
@@ -113,8 +114,15 @@
 		<script>
 			document.getElementById("new-seed")
 				.addEventListener("click", () => {
-					document.getElementById("seed")
-						.innerText = randomSeed();
+					const newSeedValue = randomSeed();
+					const seedInput = document.getElementById("seed");
+					seedInput.value = newSeedValue;
+
+					// Dispatch a change event to ensure the change is detected by listeners
+					const changeEvent = new Event('change', {
+						bubbles: true
+					});
+					seedInput.dispatchEvent(changeEvent);
 				});
 
 			function randomSeed() {

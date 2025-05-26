@@ -115,11 +115,13 @@ import { addEntry } from './utils/history.js';
     };
 
     const inputValuesChanged = function () {
+        const currentSeedValue = document.getElementById('seed').value;
+        const currentPromptValue = getPrompt();
+        const currentModelValue = document.getElementById('model').value;
 
-
-        return inputValues['seed'].value !== document.getElementById('seed').value ||
-            inputValues['prompt'].value !== getPrompt() ||
-            inputValues['model'].value !== document.getElementById('model').value;
+        return inputValues['seed'].value !== currentSeedValue ||
+            inputValues['prompt'].value !== currentPromptValue ||
+            inputValues['model'].value !== currentModelValue;
     };
 
     const cacheInputValues = function () {
@@ -176,7 +178,10 @@ import { addEntry } from './utils/history.js';
         });
     };
 
-    inputValues.seed.ref.value = workflow["3"]["inputs"]["seed"];
+    // Initialize the seed input with the value from the workflow
+    const initialSeedValue = workflow["3"]["inputs"]["seed"];
+    inputValues.seed.ref.value = initialSeedValue;
+    document.getElementById('seed').value = initialSeedValue;
 
     async function checkPrompt() {
         clearTimeout(promptTimeout);
@@ -218,6 +223,13 @@ import { addEntry } from './utils/history.js';
     });
 
     let promptTimeout = setTimeout(checkPrompt, 1000);
+
+    // Add event listener to detect changes to the seed input directly
+    document.getElementById('seed').addEventListener('change', () => {
+        // This will be caught by the regular inputValuesChanged check in checkPrompt
+        clearTimeout(promptTimeout);
+        checkPrompt();
+    });
 
     document.getElementById('prompt-select').addEventListener('change', async function () {
         const output = document.getElementsByClassName('prompt-text');

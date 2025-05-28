@@ -63,9 +63,18 @@ export const getPrompt = () => {
     const promptElements = document.getElementsByClassName('prompt');
     if (promptElements.length === 0) return '';
     const finalPrompt = Array.from(promptElements).map(
-        promptElement => promptElement.getElementsByClassName('prompt-text')[0].innerText
-            + ':'
-            + promptElement.getElementsByClassName('weight')[0].value
+        promptElement => {
+            const weightInput = promptElement.getElementsByClassName('weight')[0];
+            const value = weightInput.value;
+            const weight = isBlankOrNull(value) ? weightInput.min : value;
+            return "(" + promptElement.getElementsByClassName('prompt-text')[0].innerText + ':' + weight + ")";
+        }
     ).join(', ');
+    console.log(finalPrompt);
     return finalPrompt;
 };
+
+// Helper function to check if a value is blank or null
+function isBlankOrNull(value) {
+    return value === null || value === undefined || value === '' || value.toString().trim() === '';
+}

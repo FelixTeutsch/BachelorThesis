@@ -2,6 +2,14 @@ import { hideNotification, showNotification, NotificationType } from '../utils/n
 
 let selected = document.getElementsByClassName('selected')[0];
 const seed = document.getElementById('new-seed');
+
+const weightSpeed = 0.05;
+
+// Helper function to check if a value is blank or null
+function isBlankOrNull(value) {
+    return value === null || value === undefined || value === '' || value.toString().trim() === '';
+}
+
 class InputHandler {
     constructor() {
         this.keyBindings = new Map();
@@ -13,21 +21,23 @@ class InputHandler {
         // Increase value
         this.addKeyBinding('ArrowUp', () => {
             if (selected) {
-                selected.setAttribute('value', parseInt(selected.getAttribute('value')) + 1);
-            } else
+                const value = selected.value;
+                const currentValue = isBlankOrNull(value) ? selected.min : parseFloat(value);
+                selected.value = Math.min((currentValue + weightSpeed).toFixed(2), selected.max);
+            } else {
                 showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
-
+            }
         });
-
 
         // Decrease value
         this.addKeyBinding('ArrowDown', () => {
             if (selected) {
-                selected.setAttribute('value', Math.max(parseInt(selected.getAttribute('value')) - 1, 0));
-            } else
+                const value = selected.value;
+                const currentValue = isBlankOrNull(value) ? selected.min : parseFloat(value);
+                selected.value = Math.max((currentValue - weightSpeed).toFixed(2), selected.min);
+            } else {
                 showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
-
-
+            }
         });
 
         // Select Prompt 1

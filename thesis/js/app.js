@@ -52,6 +52,19 @@ import { addEntry } from './utils/history.js';
     // Initialize prompts
     await initializePrompts();
 
+    // Set initial pre-prompt if a prompt is selected
+    const promptSelect = document.getElementById('prompt-select');
+    if (promptSelect.value && prompts[promptSelect.value]) {
+        const prePromptDisplay = document.getElementById('pre-prompt-display');
+        const prePrompt = prompts[promptSelect.value].pre_prompt;
+        if (prePrompt && prePrompt.trim()) {
+            prePromptDisplay.style.display = 'flex';
+            prePromptDisplay.querySelector('.pre-prompt-text').textContent = prePrompt;
+        } else {
+            prePromptDisplay.style.display = 'none';
+        }
+    }
+
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
 
@@ -252,6 +265,16 @@ import { addEntry } from './utils/history.js';
             const selectedPrompt = prompts[selectedPromptName];
 
             const promptParts = selectedPrompt.prompt.split(',');
+
+            // Update pre-prompt display
+            const prePromptDisplay = document.getElementById('pre-prompt-display');
+            const prePrompt = selectedPrompt.pre_prompt;
+            if (prePrompt && prePrompt.trim()) {
+                prePromptDisplay.style.display = 'flex';
+                prePromptDisplay.querySelector('.pre-prompt-text').textContent = prePrompt;
+            } else {
+                prePromptDisplay.style.display = 'none';
+            }
 
             for (let i = 0; i < output.length; i++) {
                 output[i].innerHTML = promptParts[i];

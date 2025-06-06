@@ -1,53 +1,66 @@
 {
 	"🏠 House-Dog-Cat": {
+		"pre_prompt": "",
 		"prompt": "House,Dog,Cat",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🌳 Tree-Car-Mountain": {
+		"pre_prompt": "",
 		"prompt": "Tree,Car,Hountain",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"☁️ Cloud-Sun-Moon": {
+		"pre_prompt": "",
 		"prompt": "Cloud,Sun,Moon",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🍎 Apple-Pie-Table": {
+		"pre_prompt": "",
 		"prompt": "Apple,Pie,Table",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"📚 Book-Table-Chair": {
+		"pre_prompt": "",
 		"prompt": "Book,Table,Chair",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🚗 Car-Bike-Train": {
+		"pre_prompt": "",
 		"prompt": "Car,Bike,Train",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🐠 Fish-Bird-Reptile": {
+		"pre_prompt": "",
 		"prompt": "Fish,Bird,Reptile",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🌸 Flower-Grass-Tree": {
+		"pre_prompt": "",
 		"prompt": "Flower,Grass,Tree",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🌤️ Sky-Water-Land": {
+		"pre_prompt": "",
 		"prompt": "Sky,Water,Land",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🔥 Fire-Wind-Earth": {
+		"pre_prompt": "",
 		"prompt": "Fire,Wind,Earth",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"⛰️ Mountain-River-Lake": {
+		"pre_prompt": "",
 		"prompt": "Mountain,River,Lake",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"⭐ Star-Planet-Galaxy": {
+		"pre_prompt": "",
 		"prompt": "Star,Planet,Galaxy",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	},
 	"🌊 Ocean-Beach-Island": {
+		"pre_prompt": "",
 		"prompt": "Ocean,Beach,Island",
 		"negative_prompt": "text, low quality, blurry, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username"
 	}

@@ -66,11 +66,22 @@ export const getPrompt = () => {
     const positivePrompts = [];
     const negativePrompts = [];
 
+    // Get the pre-prompt
+    const prePromptText = document.querySelector('.pre-prompt-text').textContent;
+    if (prePromptText && prePromptText.trim()) {
+        positivePrompts.push(prePromptText);
+    }
+
     Array.from(promptElements).forEach(promptElement => {
         const weightInput = promptElement.getElementsByClassName('weight')[0];
         const value = weightInput.value;
         const weight = isBlankOrNull(value) ? weightInput.min : value;
         const promptText = promptElement.getElementsByClassName('prompt-text')[0].innerText;
+
+        // Skip prompts with weight 0
+        if (parseFloat(weight) === 0) {
+            return;
+        }
 
         if (parseFloat(weight) < 0) {
             // For negative weights, add to negative prompt with positive weight

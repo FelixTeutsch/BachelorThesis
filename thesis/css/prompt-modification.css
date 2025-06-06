@@ -145,3 +145,23 @@ input[type='number'] {
 #prompt-select-area {
 	margin-bottom: var(--s_body_padding);
 }
+
+/* ----------- Pre-prompt ----------- */
+.pre-prompt {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--c_secondary);
+	padding: var(--s_panel_padding_small);
+	border-radius: var(--br_medium);
+	margin-bottom: var(--s_label_gap);
+	opacity: 0.8;
+}
+
+.pre-prompt-text {
+	font-size: var(--f_s_text);
+	color: var(--c_text);
+	font-style: italic;
+}

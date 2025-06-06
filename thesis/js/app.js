@@ -187,8 +187,22 @@ import { addEntry } from './utils/history.js';
 
     // Function to handle workflow generation
     async function handleWorkflowGeneration() {
+        // First save and cache the current values
         saveInputValues();
         cacheInputValues();
+
+        // Get the actual prompt values from the elements
+        const prompt1 = document.getElementById('prompt-1').value.trim();
+        const prompt2 = document.getElementById('prompt-2').value.trim();
+        const prompt3 = document.getElementById('prompt-3').value.trim();
+        const seed = inputValues['seed'].cache;
+
+        console.log('Getting prompt values:', { prompt1, prompt2, prompt3, seed });
+
+        // Add the actual values to history
+        addEntry(prompt1, prompt2, prompt3, seed, true);
+
+        // Update the workflow with the cached values
         updateWorkflow();
 
         if (isQueueBusy) {
@@ -199,12 +213,6 @@ import { addEntry } from './utils/history.js';
             // If queue is not busy, queue the workflow
             isQueueBusy = true;
             updateStatus(true, false);
-
-            // Add to history before queuing
-            const prompts = inputValues['prompt'].cache.split(',').map(e => e.split(':')[1]);
-            const seed = inputValues['seed'].cache;
-            addEntry(prompts[0], prompts[1], prompts[2], seed, true);
-
             await queue_prompt(workflow);
         }
     }

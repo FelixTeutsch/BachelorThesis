@@ -25,6 +25,8 @@ redoButton.addEventListener('click', () => {
 });
 
 export const addEntry = (prompt1, prompt2, prompt3, seed, clearRedo = true) => {
+    console.log('addEntry called with:', { prompt1, prompt2, prompt3, seed });
+
     // Create the new entry
     let entry = {
         prompt1: prompt1,
@@ -32,6 +34,9 @@ export const addEntry = (prompt1, prompt2, prompt3, seed, clearRedo = true) => {
         prompt3: prompt3,
         seed: seed
     };
+
+    console.log('Created entry:', entry);
+    console.log('Current state:', currentPrompt);
 
     // Check if this is actually a different state
     let isDifferentState = true;
@@ -43,38 +48,65 @@ export const addEntry = (prompt1, prompt2, prompt3, seed, clearRedo = true) => {
             currentPrompt.prompt3 !== prompt3 ||
             currentPrompt.seed !== seed;
 
+        console.log('Is different state:', isDifferentState);
+        console.log('Comparison:', {
+            prompt1: { current: currentPrompt.prompt1, new: prompt1 },
+            prompt2: { current: currentPrompt.prompt2, new: prompt2 },
+            prompt3: { current: currentPrompt.prompt3, new: prompt3 },
+            seed: { current: currentPrompt.seed, new: seed }
+        });
+
         // Only add to history if this is a different state
         if (isDifferentState) {
+            // Add current state to undo stack
             historyArray.push(currentPrompt);
+            console.log('Added to history. History length:', historyArray.length);
+            console.log('History array:', historyArray);
+
+            // Clear redo stack when a new change is made
+            if (clearRedo) {
+                undoElementsArray = [];
+                console.log('Cleared redo stack');
+            }
+        } else {
+            console.log('State is the same, not adding to history');
         }
+    } else {
+        console.log('No current state, this is the first entry');
     }
 
     // Update current prompt
     currentPrompt = entry;
+    console.log('Updated current state:', currentPrompt);
 
-    // Only clear the redo stack if we're making a new entry with user changes
-    if (clearRedo && isDifferentState) {
-        undoElementsArray = [];
-    }
-
-    // Update button states based on array lengths
-    undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
+    // Update button states
+    updateButtonStates();
 }
 
 export const undo = () => {
     if (historyArray.length > 0) {
-        const entry = historyArray.pop();
+        console.log('Undo - Current history:', historyArray);
+        console.log('Undo - Current redo stack:', undoElementsArray);
 
-        // Save current state to redo stack before applying the undo
-        if (currentPrompt != null)
+        // Get the previous state from undo stack
+        const previousState = historyArray.pop();
+        console.log('Popped from history:', previousState);
+
+        // Save current state to redo stack
+        if (currentPrompt !== null) {
             undoElementsArray.push(currentPrompt);
+            console.log('Pushed current state to redo stack');
+        }
 
-        // Apply the previous state from history
-        applyElements(entry);
-        currentPrompt = entry;
+        // Apply the previous state
+        applyElements(previousState);
+        currentPrompt = previousState;
 
-        // Update button states based on array lengths
-        undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
+        console.log('After undo - History:', historyArray);
+        console.log('After undo - Redo stack:', undoElementsArray);
+
+        // Update button states
+        updateButtonStates();
     } else {
         showNotification('Nothing to undo', 'There are no more actions to undo!', NotificationType.WARNING);
     }
@@ -82,26 +114,37 @@ export const undo = () => {
 
 export const redo = () => {
     if (undoElementsArray.length > 0) {
-        const entry = undoElementsArray.pop();
+        console.log('Redo - Current history:', historyArray);
+        console.log('Redo - Current redo stack:', undoElementsArray);
 
-        // Save current state to undo stack before applying the redo
-        if (currentPrompt != null)
+        // Get the next state from redo stack
+        const nextState = undoElementsArray.pop();
+        console.log('Popped from redo stack:', nextState);
+
+        // Save current state to undo stack
+        if (currentPrompt !== null) {
             historyArray.push(currentPrompt);
+            console.log('Pushed current state to history');
+        }
 
-        // Apply the state from redo stack
-        applyElements(entry);
-        currentPrompt = entry;
+        // Apply the next state
+        applyElements(nextState);
+        currentPrompt = nextState;
 
-        // Update button states based on array lengths
-        undoRedo(historyArray.length <= 0, undoElementsArray.length <= 0);
+        console.log('After redo - History:', historyArray);
+        console.log('After redo - Redo stack:', undoElementsArray);
+
+        // Update button states
+        updateButtonStates();
     } else {
         showNotification('Nothing to redo', 'There are no more actions to redo!', NotificationType.WARNING);
     }
 }
 
 const applyElements = (entry) => {
-    // Directly update the value property instead of using setAttribute
-    // This ensures the DOM actually updates and triggers any related events
+    console.log('Applying elements:', entry);
+
+    // Update prompt text content
     prompt1.value = entry['prompt1'];
     prompt2.value = entry['prompt2'];
     prompt3.value = entry['prompt3'];
@@ -114,11 +157,10 @@ const applyElements = (entry) => {
     seed.dispatchEvent(changeEvent);
 }
 
-const undoRedo = (undoEmpty, redoEmpty) => {
-    // Enable the button when there are items to undo/redo
-    // Disable the button when there are no items to undo/redo
-    undoButton.disabled = undoEmpty;
-    redoButton.disabled = redoEmpty;
+const updateButtonStates = () => {
+    console.log('Updating button states - History length:', historyArray.length, 'Redo stack length:', undoElementsArray.length);
+    undoButton.disabled = historyArray.length === 0;
+    redoButton.disabled = undoElementsArray.length === 0;
 }
 
 export const clear = () => {

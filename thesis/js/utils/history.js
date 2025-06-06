@@ -27,12 +27,18 @@ redoButton.addEventListener('click', () => {
 export const addEntry = (prompt1, prompt2, prompt3, seed, clearRedo = true) => {
     console.log('addEntry called with:', { prompt1, prompt2, prompt3, seed });
 
+    // Get the current model and prompt select values
+    const model = document.getElementById('model').value;
+    const promptSelect = document.getElementById('prompt-select').value;
+
     // Create the new entry
     let entry = {
         prompt1: prompt1,
         prompt2: prompt2,
         prompt3: prompt3,
-        seed: seed
+        seed: seed,
+        model: model,
+        promptSelect: promptSelect
     };
 
     console.log('Created entry:', entry);
@@ -46,14 +52,18 @@ export const addEntry = (prompt1, prompt2, prompt3, seed, clearRedo = true) => {
             currentPrompt.prompt1 !== prompt1 ||
             currentPrompt.prompt2 !== prompt2 ||
             currentPrompt.prompt3 !== prompt3 ||
-            currentPrompt.seed !== seed;
+            currentPrompt.seed !== seed ||
+            currentPrompt.model !== model ||
+            currentPrompt.promptSelect !== promptSelect;
 
         console.log('Is different state:', isDifferentState);
         console.log('Comparison:', {
             prompt1: { current: currentPrompt.prompt1, new: prompt1 },
             prompt2: { current: currentPrompt.prompt2, new: prompt2 },
             prompt3: { current: currentPrompt.prompt3, new: prompt3 },
-            seed: { current: currentPrompt.seed, new: seed }
+            seed: { current: currentPrompt.seed, new: seed },
+            model: { current: currentPrompt.model, new: model },
+            promptSelect: { current: currentPrompt.promptSelect, new: promptSelect }
         });
 
         // Only add to history if this is a different state
@@ -145,16 +155,22 @@ const applyElements = (entry) => {
     console.log('Applying elements:', entry);
 
     // Update prompt text content
-    prompt1.value = entry['prompt1'];
-    prompt2.value = entry['prompt2'];
-    prompt3.value = entry['prompt3'];
+    prompt1.textContent = entry['prompt1'];
+    prompt2.textContent = entry['prompt2'];
+    prompt3.textContent = entry['prompt3'];
 
     // Update the seed input value
     seed.value = entry['seed'];
 
-    // Dispatch a change event to notify that the seed value has changed
+    // Update model and prompt select
+    document.getElementById('model').value = entry['model'];
+    document.getElementById('prompt-select').value = entry['promptSelect'];
+
+    // Dispatch change events to trigger updates
     const changeEvent = new Event('change', { bubbles: true });
     seed.dispatchEvent(changeEvent);
+    document.getElementById('model').dispatchEvent(changeEvent);
+    document.getElementById('prompt-select').dispatchEvent(changeEvent);
 }
 
 const updateButtonStates = () => {

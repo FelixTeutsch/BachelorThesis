@@ -9,7 +9,6 @@ export async function loadModels() {
         const modelSelect = document.getElementById('model');
         modelSelect.innerHTML = models
             .reverse()
-            .filter(model => !model.toLowerCase().includes('dreamshaper'))
             .map(model => `<option value="${model}">${beautifyFilename(model)}</option>`)
             .join('');
 

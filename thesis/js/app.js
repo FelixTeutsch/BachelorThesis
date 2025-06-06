@@ -51,8 +51,20 @@ import { addEntry } from './utils/history.js';
     // Websocket connection
     const server_address = window.location.hostname + ':' + window.location.port;
     const socket = new WebSocket('ws://' + server_address + '/ws?clientId=' + client_id);
+
+    // Handle WebSocket connection
     socket.addEventListener('open', (event) => {
-        // Websocket connection established
+        console.log('WebSocket connection established');
+        updateStatus(false, false);
+    });
+
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket connection closed');
+        updateStatus(false, false);
+    });
+
+    socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
         updateStatus(false, false);
     });
 
@@ -274,6 +286,9 @@ import { addEntry } from './utils/history.js';
     // Add input listeners
     addInputListeners();
 
+    // Queue initial prompt after initialization
+    handleWorkflowGeneration();
+
     // Resolution controller
     document.querySelectorAll('.radio-card-input').forEach(input => {
         input.addEventListener('change', function () {
@@ -298,47 +313,65 @@ import { addEntry } from './utils/history.js';
 
     // Websocket message handler
     socket.addEventListener('message', async (event) => {
-        const message = JSON.parse(event.data);
+        try {
+            const message = JSON.parse(event.data);
 
-        if (message.type === 'executing') {
-            if (message.data.node === null && message.data.prompt_id === client_id) {
-                // Generation started
-                resetProgress();
-            } else {
+            if (message.type === 'executing') {
+                if (message.data.node === null && message.data.prompt_id === client_id) {
+                    // Generation started
+                    resetProgress();
+                } else {
+                    // Update progress
+                    const value = Number(message.data.value);
+                    const max = Number(message.data.max);
+                    if (isFinite(value) && isFinite(max) && max > 0) {
+                        updateProgress(value, max);
+                    }
+                }
+            } else if (message.type === 'progress') {
                 // Update progress
                 const value = Number(message.data.value);
                 const max = Number(message.data.max);
                 if (isFinite(value) && isFinite(max) && max > 0) {
                     updateProgress(value, max);
                 }
-            }
-        } else if (message.type === 'progress') {
-            // Update progress
-            const value = Number(message.data.value);
-            const max = Number(message.data.max);
-            if (isFinite(value) && isFinite(max) && max > 0) {
-                updateProgress(value, max);
-            }
-        } else if (message.type === 'executed' || message.type === 'execution_success') {
-            console.log(message);
-            if (message.data.node === "9") {
-                console.log('Execution completed');
-                // Generation completed
-                finishProgress();
-                isQueueBusy = false;
+            } else if (message.type === 'executed' || message.type === 'execution_success') {
+                console.log(message);
+                if (message.data.node === "9") {
+                    console.log('Execution completed');
+                    // Generation completed
+                    finishProgress();
+                    isQueueBusy = false;
 
-                // Display the generated image
-                if ('images' in message.data.output) {
-                    const image = message.data.output.images[0];
-                    const filename = image.filename;
-                    const subfolder = image.subfolder;
-                    const rand = Math.random();
-                    generationOutput.src = `/view?filename=${filename}&type=output&subfolder=${subfolder}&rand=${rand}`;
+                    // Display the generated image
+                    if ('images' in message.data.output) {
+                        const image = message.data.output.images[0];
+                        const filename = image.filename;
+                        const subfolder = image.subfolder;
+                        const rand = Math.random();
+                        generationOutput.src = `/view?filename=${filename}&type=output&subfolder=${subfolder}&rand=${rand}`;
+                    }
+
+                    // Check if there's a cached workflow
+                    if (cachedWorkflow) {
+                        // Queue the cached workflow
+                        isQueueBusy = true;
+                        updateStatus(true, false);
+                        await queue_prompt(cachedWorkflow);
+                        cachedWorkflow = null;
+                    } else {
+                        updateStatus(false, false);
+                    }
                 }
+            } else if (message.type === 'execution_error') {
+                // Handle execution errors
+                console.error(`Execution error: ${message.data.exception_message}`);
+                showNotification('Error', `An error occurred during execution: ${message.data.exception_message}`, NotificationType.ERROR);
 
-                // Check if there's a cached workflow
+                // Reset queue state and continue with cached workflow if exists
+                isQueueBusy = false;
+                finishProgress(); // Ensure progress is finished on error
                 if (cachedWorkflow) {
-                    // Queue the cached workflow
                     isQueueBusy = true;
                     updateStatus(true, false);
                     await queue_prompt(cachedWorkflow);
@@ -346,30 +379,17 @@ import { addEntry } from './utils/history.js';
                 } else {
                     updateStatus(false, false);
                 }
+            } else if (message.type === 'execution_start') {
+                // Reset progress when execution starts
+                resetProgress();
+            } else if (message.type === 'execution_cached') {
+                // Handle cached execution
+                console.log('Execution cached');
+                finishProgress(); // Ensure progress is finished for cached executions
             }
-        } else if (message.type === 'execution_error') {
-            // Handle execution errors
-            console.error(`Execution error: ${message.data.exception_message}`);
-            showNotification('Error', `An error occurred during execution: ${message.data.exception_message}`, NotificationType.ERROR);
-
-            // Reset queue state and continue with cached workflow if exists
-            isQueueBusy = false;
-            finishProgress(); // Ensure progress is finished on error
-            if (cachedWorkflow) {
-                isQueueBusy = true;
-                updateStatus(true, false);
-                await queue_prompt(cachedWorkflow);
-                cachedWorkflow = null;
-            } else {
-                updateStatus(false, false);
-            }
-        } else if (message.type === 'execution_start') {
-            // Reset progress when execution starts
-            resetProgress();
-        } else if (message.type === 'execution_cached') {
-            // Handle cached execution
-            console.log('Execution cached');
-            finishProgress(); // Ensure progress is finished for cached executions
+        } catch (error) {
+            console.error('Error handling WebSocket message:', error);
+            updateStatus(false, false);
         }
     });
 

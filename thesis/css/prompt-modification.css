@@ -165,3 +165,28 @@ input[type='number'] {
 	color: var(--c_text);
 	font-style: italic;
 }
+
+/* ----------- Generation Status ----------- */
+.generation-status {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: center;
+	align-items: center;
+	gap: var(--s_label_gap);
+	background-color: var(--c_secondary);
+	padding: var(--s_panel_padding_small);
+	border-radius: var(--br_medium);
+	margin-bottom: var(--s_label_gap);
+	opacity: 0.8;
+}
+
+.status-icon {
+	font-size: var(--f_s_text);
+	color: var(--c_text);
+}
+
+.status-text {
+	font-size: var(--f_s_text);
+	color: var(--c_text);
+}

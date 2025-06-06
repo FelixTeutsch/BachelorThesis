@@ -5,6 +5,12 @@ const progressText = document.querySelector('.progress-text');
 // Progress bar functionality
 function updateProgress(value, max) {
     if (progressBar && progressText) {
+        // Validate inputs
+        if (!isFinite(value) || !isFinite(max) || max <= 0) {
+            console.warn('Invalid progress values:', { value, max });
+            return;
+        }
+
         // Calculate relative progress between 2-98%
         const relativeProgress = 2 + ((value / max) * 96);
 

@@ -26,18 +26,41 @@ import { addEntry } from './utils/history.js';
     }
     const workflow = await loadWorkflow();
 
+    // Queue and cache state
+    let isQueueBusy = false;
+    let cachedWorkflow = null;
+
+    // Status update function
+    function updateStatus(isGenerating, isCached) {
+        const statusElement = document.getElementById('generation-status');
+        const iconElement = statusElement.querySelector('.status-icon');
+        const textElement = statusElement.querySelector('.status-text');
+
+        if (isGenerating) {
+            iconElement.textContent = 'hourglass_top';
+            textElement.textContent = 'Generating...';
+        } else if (isCached) {
+            iconElement.textContent = 'schedule';
+            textElement.textContent = 'Queued';
+        } else {
+            iconElement.textContent = 'hourglass_empty';
+            textElement.textContent = 'Waiting for input';
+        }
+    }
+
     // Websocket connection
     const server_address = window.location.hostname + ':' + window.location.port;
     const socket = new WebSocket('ws://' + server_address + '/ws?clientId=' + client_id);
     socket.addEventListener('open', (event) => {
         // Websocket connection established
+        updateStatus(false, false);
     });
 
     const generationOutput = document.getElementById("output-image");
 
     // Populate model and prompt selects
     loadModels();
-    let prompts = {}; // Initialize as empty object
+    let prompts = {};
 
     // Load prompts asynchronously
     async function initializePrompts() {
@@ -132,51 +155,9 @@ import { addEntry } from './utils/history.js';
         return inputValues;
     };
 
-    const inputValuesChanged = function () {
-        const currentSeedValue = document.getElementById('seed').value;
-        const currentPrompts = getPrompt();
-        const currentModelValue = document.getElementById('model').value;
-
-        return inputValues['seed'].value !== currentSeedValue ||
-            inputValues['prompt'].value !== currentPrompts.positive ||
-            inputValues['negative-prompt'].value !== currentPrompts.negative ||
-            inputValues['model'].value !== currentModelValue;
-    };
-
     const cacheInputValues = function () {
         Object.keys(inputValues).forEach(key => {
             inputValues[key].cache = inputValues[key].value;
-        });
-        return inputValues;
-    };
-
-    const chachedValuesExecuted = function () {
-        const result = Object.keys(inputValues).some(key => inputValues[key].cache !== inputValues[key].lastExecutedInput);
-        return result;
-    };
-
-    const setLastExecuted = function () {
-        if (inputValues['prompt'].lastExecutedInput != null) {
-            const prompts = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
-            const seed = inputValues['seed'].lastExecutedInput;
-
-            // Determine if this is a user-initiated change or just an automatic re-generation
-            const isNewUserInput =
-                (inputValues['seed'].cache !== inputValues['seed'].lastExecutedInput ||
-                    inputValues['prompt'].cache !== inputValues['prompt'].lastExecutedInput ||
-                    inputValues['negative-prompt'].cache !== inputValues['negative-prompt'].lastExecutedInput) &&
-                // Additional check: is cache different from what was already executed before?
-                (inputValues['seed'].cache !== inputValues['seed'].value ||
-                    inputValues['prompt'].cache !== inputValues['prompt'].value ||
-                    inputValues['negative-prompt'].cache !== inputValues['negative-prompt'].value);
-
-            // Pass the clearRedo flag to control whether to clear redo history
-            // Only clear redo when there's an actual user change
-            addEntry(prompts[0], prompts[1], prompts[2], seed, isNewUserInput);
-        }
-        // Update the last executed values
-        Object.keys(inputValues).forEach(key => {
-            inputValues[key].lastExecutedInput = inputValues[key].cache;
         });
         return inputValues;
     };
@@ -204,38 +185,86 @@ import { addEntry } from './utils/history.js';
         }
     };
 
-    // Initialize the seed input with the value from the workflow
-    const initialSeedValue = workflow["3"]["inputs"]["seed"];
-    inputValues.seed.ref.value = initialSeedValue;
-    document.getElementById('seed').value = initialSeedValue;
-
-    async function checkPrompt() {
-        clearTimeout(promptTimeout);
-
-        // Check if the input values have changed
-        if (inputValuesChanged()) {
-            saveInputValues();
-            cacheInputValues();
-            promptTimeout = setTimeout(checkPrompt, 1000);
-            return;
-        }
-
-        // Update workflow with input values
+    // Function to handle workflow generation
+    async function handleWorkflowGeneration() {
+        saveInputValues();
+        cacheInputValues();
         updateWorkflow();
 
-        if (chachedValuesExecuted()) {
-            resetProgress();
-            await queue_prompt(workflow);
-            setLastExecuted();
-        }
+        if (isQueueBusy) {
+            // If queue is busy, cache the workflow
+            cachedWorkflow = JSON.parse(JSON.stringify(workflow));
+            updateStatus(true, true);
+        } else {
+            // If queue is not busy, queue the workflow
+            isQueueBusy = true;
+            updateStatus(true, false);
 
-        // Queue next generation
-        promptTimeout = setTimeout(checkPrompt, 1000);
+            // Add to history before queuing
+            const prompts = inputValues['prompt'].cache.split(',').map(e => e.split(':')[1]);
+            const seed = inputValues['seed'].cache;
+            addEntry(prompts[0], prompts[1], prompts[2], seed, true);
+
+            await queue_prompt(workflow);
+        }
+    }
+
+    // Add event listeners for all inputs
+    function addInputListeners() {
+        // Listen for weight changes
+        document.querySelectorAll('.weight').forEach(weightInput => {
+            weightInput.addEventListener('input', handleWorkflowGeneration);
+            weightInput.addEventListener('change', handleWorkflowGeneration);
+        });
+
+        // Listen for seed changes
+        document.getElementById('seed').addEventListener('input', handleWorkflowGeneration);
+        document.getElementById('seed').addEventListener('change', handleWorkflowGeneration);
+
+        // Listen for model changes
+        document.getElementById('model').addEventListener('input', handleWorkflowGeneration);
+        document.getElementById('model').addEventListener('change', handleWorkflowGeneration);
+
+        // Listen for prompt set changes
+        document.getElementById('prompt-select').addEventListener('change', async function () {
+            const output = document.getElementsByClassName('prompt-text');
+            const selectedPromptName = this.value;
+
+            if (selectedPromptName && prompts[selectedPromptName]) {
+                const selectedPrompt = prompts[selectedPromptName];
+
+                const promptParts = selectedPrompt.prompt.split(',');
+
+                // Update pre-prompt display
+                const prePromptDisplay = document.getElementById('pre-prompt-display');
+                const prePrompt = selectedPrompt.pre_prompt;
+                if (prePrompt && prePrompt.trim()) {
+                    prePromptDisplay.style.display = 'flex';
+                    prePromptDisplay.querySelector('.pre-prompt-text').textContent = prePrompt;
+                } else {
+                    prePromptDisplay.style.display = 'none';
+                }
+
+                for (let i = 0; i < output.length; i++) {
+                    output[i].innerHTML = promptParts[i];
+                }
+
+                document.getElementById('negative-prompt').value = selectedPrompt.negative_prompt;
+
+                // Trigger generation after prompt set change
+                handleWorkflowGeneration();
+            } else {
+                console.warn('Selected prompt not found in prompts data');
+            }
+        });
     }
 
     // Initialize the input handler
     const inputHandler = new InputHandler();
     inputHandler.initialize();
+
+    // Add input listeners
+    addInputListeners();
 
     // Resolution controller
     document.querySelectorAll('.radio-card-input').forEach(input => {
@@ -244,106 +273,96 @@ import { addEntry } from './utils/history.js';
                 const label = this.nextElementSibling;
                 label.classList.add("selected");
                 inputValues.size.ref.value = this.value;
+                handleWorkflowGeneration();
             }
         });
     });
 
-    let promptTimeout = setTimeout(checkPrompt, 1000);
-
     // Add event listener to detect changes to the seed input directly
     document.getElementById('seed').addEventListener('change', () => {
-        // This will be caught by the regular inputValuesChanged check in checkPrompt
-        clearTimeout(promptTimeout);
-        checkPrompt();
+        handleWorkflowGeneration();
     });
 
-    document.getElementById('prompt-select').addEventListener('change', async function () {
-        const output = document.getElementsByClassName('prompt-text');
-        const selectedPromptName = this.value;
-
-        if (selectedPromptName && prompts[selectedPromptName]) {
-            const selectedPrompt = prompts[selectedPromptName];
-
-            const promptParts = selectedPrompt.prompt.split(',');
-
-            // Update pre-prompt display
-            const prePromptDisplay = document.getElementById('pre-prompt-display');
-            const prePrompt = selectedPrompt.pre_prompt;
-            if (prePrompt && prePrompt.trim()) {
-                prePromptDisplay.style.display = 'flex';
-                prePromptDisplay.querySelector('.pre-prompt-text').textContent = prePrompt;
-            } else {
-                prePromptDisplay.style.display = 'none';
-            }
-
-            for (let i = 0; i < output.length; i++) {
-                output[i].innerHTML = promptParts[i];
-            }
-
-            document.getElementById('negative-prompt').value = selectedPrompt.negative_prompt;
-
-        } else {
-            console.warn('Selected prompt not found in prompts data');
-        }
+    // Add event listener for the new seed button
+    document.getElementById('new-seed').addEventListener('click', () => {
+        handleWorkflowGeneration();
     });
 
     // Websocket message handler
     socket.addEventListener('message', async (event) => {
-        var data = "";
-        try {
-            if (event.data instanceof Blob) {
-                return;
+        const message = JSON.parse(event.data);
+
+        if (message.type === 'executing') {
+            if (message.data.node === null && message.data.prompt_id === client_id) {
+                // Generation started
+                resetProgress();
             } else {
-                data = JSON.parse(event.data);
+                // Update progress
+                const value = Number(message.data.value);
+                const max = Number(message.data.max);
+                if (isFinite(value) && isFinite(max) && max > 0) {
+                    updateProgress(value, max);
+                }
             }
-        } catch (error) {
-            console.error("Error parsing websocket message:", error);
-            showNotification('Error', `Failed to parse websocket message: ${error.message}`, NotificationType.ERROR);
-            return;
-        }
-        switch (data.type) {
-            case 'statusfe':
-                if (data.data.status.exec_info.queue_remaining > 0) {
-                    resetProgress();
-                }
-                break;
-            case 'executing':
-                // Currently executing
-                break;
-            case 'executed':
+        } else if (message.type === 'progress') {
+            // Update progress
+            const value = Number(message.data.value);
+            const max = Number(message.data.max);
+            if (isFinite(value) && isFinite(max) && max > 0) {
+                updateProgress(value, max);
+            }
+        } else if (message.type === 'executed' || message.type === 'execution_success') {
+            console.log(message);
+            if (message.data.node === "9") {
+                console.log('Execution completed');
+                // Generation completed
                 finishProgress();
-                if ('images' in data['data']['output']) {
-                    const image = data['data']['output']['images'][0];
-                    const filename = image['filename']
-                    const subfolder = image['subfolder']
-                    const rand = Math.random();
+                isQueueBusy = false;
 
-                    generationOutput.src = '/view?filename=' + filename + '&type=output&subfolder=' + subfolder + '&rand=' + rand;
+                // Display the generated image
+                if ('images' in message.data.output) {
+                    const image = message.data.output.images[0];
+                    const filename = image.filename;
+                    const subfolder = image.subfolder;
+                    const rand = Math.random();
+                    generationOutput.src = `/view?filename=${filename}&type=output&subfolder=${subfolder}&rand=${rand}`;
                 }
 
-                break;
-            case 'progress':
-                updateProgress(data.data.value, data.data.max);
-                break;
-            case 'execution_start':
-                // Execution started
-                break;
-            case 'execution_cached':
-                // Execution cached
-                break;
-            case 'execution_error':
-                const errorData = data.data;
-                // Log error details to console for debugging
-                console.error(`Execution error in prompt ${errorData.prompt_id}: ${errorData.exception_message}`);
-                showNotification(errorData.exception_type, `An error occurred during execution: ${data.data.exception_message}`, NotificationType.ERROR);
-                break;
-            case 'execution_success':
-                // Execution completed successfully
-                break;
-            default:
-                // Unknown message type
-                break;
+                // Check if there's a cached workflow
+                if (cachedWorkflow) {
+                    // Queue the cached workflow
+                    isQueueBusy = true;
+                    updateStatus(true, false);
+                    await queue_prompt(cachedWorkflow);
+                    cachedWorkflow = null;
+                } else {
+                    updateStatus(false, false);
+                }
+            }
+        } else if (message.type === 'execution_error') {
+            // Handle execution errors
+            console.error(`Execution error: ${message.data.exception_message}`);
+            showNotification('Error', `An error occurred during execution: ${message.data.exception_message}`, NotificationType.ERROR);
+
+            // Reset queue state and continue with cached workflow if exists
+            isQueueBusy = false;
+            finishProgress(); // Ensure progress is finished on error
+            if (cachedWorkflow) {
+                isQueueBusy = true;
+                updateStatus(true, false);
+                await queue_prompt(cachedWorkflow);
+                cachedWorkflow = null;
+            } else {
+                updateStatus(false, false);
+            }
+        } else if (message.type === 'execution_start') {
+            // Reset progress when execution starts
+            resetProgress();
+        } else if (message.type === 'execution_cached') {
+            // Handle cached execution
+            console.log('Execution cached');
+            finishProgress(); // Ensure progress is finished for cached executions
         }
     });
 
-})(window, document, undefined);
+})(window, document);

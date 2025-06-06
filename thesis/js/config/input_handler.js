@@ -24,6 +24,8 @@ class InputHandler {
                 const value = selected.value;
                 const currentValue = isBlankOrNull(value) ? selected.min : parseFloat(value);
                 selected.value = Math.min((currentValue + weightSpeed).toFixed(2), selected.max);
+                // Trigger change event
+                selected.dispatchEvent(new Event('change', { bubbles: true }));
             } else {
                 showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
             }
@@ -35,6 +37,8 @@ class InputHandler {
                 const value = selected.value;
                 const currentValue = isBlankOrNull(value) ? selected.min : parseFloat(value);
                 selected.value = Math.max((currentValue - weightSpeed).toFixed(2), selected.min);
+                // Trigger change event
+                selected.dispatchEvent(new Event('change', { bubbles: true }));
             } else {
                 showNotification('Nothing selected', 'No element selected! Please select an element first!', NotificationType.WARNING);
             }
@@ -105,16 +109,14 @@ class InputHandler {
     }
 
     updateSelectedItem(id) {
-        // remove ID
-        if (selected)
-            selected.classList.remove('selected');
-        // Get element by id id
-        selected = document.getElementById(id);
-        if (!selected) {
-            showNotification('Invalid ID', `Element with ID ${id} not found`, NotificationType.ERROR);
-            return;
+        const newSelected = document.getElementById(id);
+        if (newSelected) {
+            if (selected) {
+                selected.classList.remove('selected');
+            }
+            newSelected.classList.add('selected');
+            selected = newSelected;
         }
-        selected.classList.add('selected');
     }
 
     initialize() {

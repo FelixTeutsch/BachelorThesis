@@ -61,17 +61,44 @@ export const sanitizeString = (str) =>
 
 export const getPrompt = () => {
     const promptElements = document.getElementsByClassName('prompt');
-    if (promptElements.length === 0) return '';
-    const finalPrompt = Array.from(promptElements).map(
-        promptElement => {
-            const weightInput = promptElement.getElementsByClassName('weight')[0];
-            const value = weightInput.value;
-            const weight = isBlankOrNull(value) ? weightInput.min : value;
-            return "(" + promptElement.getElementsByClassName('prompt-text')[0].innerText + ':' + weight + ")";
+    if (promptElements.length === 0) return { positive: '', negative: '' };
+
+    const positivePrompts = [];
+    const negativePrompts = [];
+
+    Array.from(promptElements).forEach(promptElement => {
+        const weightInput = promptElement.getElementsByClassName('weight')[0];
+        const value = weightInput.value;
+        const weight = isBlankOrNull(value) ? weightInput.min : value;
+        const promptText = promptElement.getElementsByClassName('prompt-text')[0].innerText;
+
+        if (parseFloat(weight) < 0) {
+            // For negative weights, add to negative prompt with positive weight
+            negativePrompts.push(`(${promptText}:${Math.abs(parseFloat(weight))})`);
+        } else {
+            // For positive weights, add to positive prompt
+            positivePrompts.push(`(${promptText}:${weight})`);
         }
-    ).join(', ');
-    console.log(finalPrompt);
-    return finalPrompt;
+    });
+
+    const positivePrompt = positivePrompts.join(', ');
+    const negativePrompt = negativePrompts.join(', ');
+
+    // Get the base negative prompt from the hidden input
+    const baseNegativePrompt = document.getElementById('negative-prompt').value;
+
+    // Combine base negative prompt with any negative prompts from weights
+    const finalNegativePrompt = negativePrompts.length > 0
+        ? `${baseNegativePrompt}, ${negativePrompt}`
+        : baseNegativePrompt;
+
+    console.log('Positive prompt:', positivePrompt);
+    console.log('Negative prompt:', finalNegativePrompt);
+
+    return {
+        positive: positivePrompt,
+        negative: finalNegativePrompt
+    };
 };
 
 // Helper function to check if a value is blank or null

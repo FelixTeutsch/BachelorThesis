@@ -88,6 +88,9 @@ import { addEntry } from './utils/history.js';
             workflow: [["6"], ["inputs"], ["text"]],
             reference: document.getElementById('prompt'),
         }, {
+            workflow: [["6"], ["inputs"], ["negative_prompt"]],
+            reference: document.getElementById('negative-prompt'),
+        }, {
             workflow: [["3"], ["inputs"], ["seed"]],
             reference: document.getElementById('seed'),
         }, {
@@ -109,18 +112,21 @@ import { addEntry } from './utils/history.js';
 
     const saveInputValues = function () {
         inputValues['seed'].value = document.getElementById('seed').value;
-        inputValues['prompt'].value = getPrompt();
+        const prompts = getPrompt();
+        inputValues['prompt'].value = prompts.positive;
+        inputValues['negative-prompt'].value = prompts.negative;
         inputValues['model'].value = document.getElementById('model').value;
         return inputValues;
     };
 
     const inputValuesChanged = function () {
         const currentSeedValue = document.getElementById('seed').value;
-        const currentPromptValue = getPrompt();
+        const currentPrompts = getPrompt();
         const currentModelValue = document.getElementById('model').value;
 
         return inputValues['seed'].value !== currentSeedValue ||
-            inputValues['prompt'].value !== currentPromptValue ||
+            inputValues['prompt'].value !== currentPrompts.positive ||
+            inputValues['negative-prompt'].value !== currentPrompts.negative ||
             inputValues['model'].value !== currentModelValue;
     };
 
@@ -138,20 +144,22 @@ import { addEntry } from './utils/history.js';
 
     const setLastExecuted = function () {
         if (inputValues['prompt'].lastExecutedInput != null) {
-            const prompt = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
+            const prompts = inputValues['prompt'].lastExecutedInput.split(',').map(e => e.split(':')[1]);
             const seed = inputValues['seed'].lastExecutedInput;
 
             // Determine if this is a user-initiated change or just an automatic re-generation
             const isNewUserInput =
                 (inputValues['seed'].cache !== inputValues['seed'].lastExecutedInput ||
-                    inputValues['prompt'].cache !== inputValues['prompt'].lastExecutedInput) &&
+                    inputValues['prompt'].cache !== inputValues['prompt'].lastExecutedInput ||
+                    inputValues['negative-prompt'].cache !== inputValues['negative-prompt'].lastExecutedInput) &&
                 // Additional check: is cache different from what was already executed before?
                 (inputValues['seed'].cache !== inputValues['seed'].value ||
-                    inputValues['prompt'].cache !== inputValues['prompt'].value);
+                    inputValues['prompt'].cache !== inputValues['prompt'].value ||
+                    inputValues['negative-prompt'].cache !== inputValues['negative-prompt'].value);
 
             // Pass the clearRedo flag to control whether to clear redo history
             // Only clear redo when there's an actual user change
-            addEntry(prompt[0], prompt[1], prompt[2], seed, isNewUserInput);
+            addEntry(prompts[0], prompts[1], prompts[2], seed, isNewUserInput);
         }
         // Update the last executed values
         Object.keys(inputValues).forEach(key => {
@@ -176,6 +184,11 @@ import { addEntry } from './utils/history.js';
                 workflow[workflowPath[0]][workflowPath[1]] = value;
             }
         });
+
+        // Update negative prompt in the workflow
+        if (workflow["6"]["inputs"]["negative_prompt"]) {
+            workflow["6"]["inputs"]["negative_prompt"] = inputValues['negative-prompt'].cache;
+        }
     };
 
     // Initialize the seed input with the value from the workflow

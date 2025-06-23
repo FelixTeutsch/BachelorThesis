@@ -64,6 +64,7 @@ body {
 	max-width: fit-content;
 	border: none;
 	text-align: right;
+	min-width: 48px;
 }
 
 /* Hide up down buttons */

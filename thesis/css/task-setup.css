@@ -8,7 +8,7 @@
 	width: 100vw;
 	height: 100vh;
 	overflow: auto;
-	background: rgba(0, 0, 0, 0.4);
+	background: rgba(0, 0, 0, 0.4); /* fallback for overlay */
 	justify-content: center;
 	align-items: center;
 }
@@ -16,18 +16,22 @@
 	display: flex;
 }
 .modal-content {
-	background: #fff;
+	background: var(--c_panel);
 	margin: auto;
-	padding: 2rem;
-	border-radius: 8px;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+	padding: var(--s_panel_padding);
+	border-radius: var(--br_medium);
+	box-shadow: var(--sh_panel);
 	min-width: 320px;
 	max-width: 90vw;
+	color: var(--c_text);
+	font-family: var(--f_f_text);
+	border: rgba(255, 255, 255, 0.25) solid 1px;
 }
 .input-group {
 	margin-bottom: 1.2rem;
 	display: flex;
 	flex-direction: column;
+	gap: var(--s_label_gap);
 }
 .radio-group {
 	display: flex;
@@ -39,20 +43,23 @@
 	align-items: center;
 	gap: 0.5rem;
 	cursor: pointer;
+	font-family: var(--f_f_text);
+	color: var(--c_text);
 }
 #start-task-btn,
 #modal-start-task {
 	margin-top: 1.5rem;
 	padding: 0.7rem 1.5rem;
-	font-size: 1rem;
+	font-size: var(--f_s_text);
 	border: none;
-	border-radius: 4px;
-	background: #1976d2;
-	color: #fff;
+	border-radius: var(--br_small);
+	background: var(--c_primary);
+	color: var(--c_panel);
 	cursor: pointer;
 	transition: background 0.2s;
+	font-family: var(--f_f_text);
 }
 #start-task-btn:hover,
 #modal-start-task:hover {
-	background: #1565c0;
+	background: var(--c_accent);
 }

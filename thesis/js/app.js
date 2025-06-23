@@ -288,7 +288,7 @@ import { addEntry } from './utils/history.js';
             return 0;
         result = Math.max(result, ref.min);
         result = Math.min(result, ref.max);
-        ref.value = result.toPrecision(3);
+        ref.value = result;
         return result;
     }
 

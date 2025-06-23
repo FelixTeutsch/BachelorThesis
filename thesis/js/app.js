@@ -5,6 +5,7 @@ import { showNotification, NotificationType } from './utils/notification.js';
 import { resetProgress, updateProgress, finishProgress } from './progress.js';
 import { getPrompt } from './utils/TextUtils.js';
 import { addEntry } from './utils/history.js';
+import { onImageGenerated } from './task-setup.js'
 
 (async (window, document, undefined) => {
     // UUID generator
@@ -29,6 +30,22 @@ import { addEntry } from './utils/history.js';
     // Queue and cache state
     let isQueueBusy = false;
     let cachedWorkflow = null;
+    let promptValues = {
+        cache: {
+            prompt: '',
+            weight_1: 1,
+            weight_2: 1,
+            weight_3: 1,
+            seed: '961946033861284'
+        },
+        queue: {
+            prompt: '',
+            weight_1: 1,
+            weight_2: 1,
+            weight_3: 1,
+            seed: '961946033861284'
+        }
+    }
 
     // Status update function
     function updateStatus(isGenerating, isCached) {
@@ -102,6 +119,8 @@ import { addEntry } from './utils/history.js';
 
     async function queue_prompt(prompt = {}) {
         const data = { 'prompt': prompt, 'client_id': client_id };
+
+        onImageGenerated(promptValues.queue.weight_1, promptValues.queue.weight_2, promptValues.queue.weight_3, promptValues.queue.seed, promptValues.queue.prompt);
 
         try {
             const response = await fetch('/prompt', {
@@ -221,13 +240,33 @@ import { addEntry } from './utils/history.js';
         if (isQueueBusy) {
             // If queue is busy, cache the workflow
             cachedWorkflow = JSON.parse(JSON.stringify(workflow));
+            setPromptValues(false, prompt1, prompt2, prompt3, seed, document.getElementById('prompt-select').value);
             updateStatus(true, true);
         } else {
-            // If queue is not busy, queue the workflow
+            setPromptValues(true, prompt1, prompt2, prompt3, seed, document.getElementById('prompt-select').value);
             isQueueBusy = true;
             updateStatus(true, false);
             await queue_prompt(workflow);
         }
+    }
+
+    function setPromptValuesToQueued() {
+        const tempValues = promptValues.cache;
+        promptValues.queue = tempValues;
+    }
+
+    function setPromptValues(isQueue, weight1, weight2, weight3, seed, prompt) {
+        const tempValues = {
+            prompt: prompt,
+            weight_1: weight1,
+            weight_2: weight2,
+            weight_3: weight3,
+            seed: seed
+        }
+        if (isQueue)
+            promptValues.queue = tempValues;
+        else
+            promptValues.cache = tempValues;
     }
 
     // Add event listeners for all inputs
@@ -368,6 +407,7 @@ import { addEntry } from './utils/history.js';
                         // Queue the cached workflow
                         isQueueBusy = true;
                         updateStatus(true, false);
+                        setPromptValuesToQueued();
                         await queue_prompt(cachedWorkflow);
                         cachedWorkflow = null;
                     } else {
@@ -385,6 +425,7 @@ import { addEntry } from './utils/history.js';
                 if (cachedWorkflow) {
                     isQueueBusy = true;
                     updateStatus(true, false);
+                    setPromptValuesToQueued();
                     await queue_prompt(cachedWorkflow);
                     cachedWorkflow = null;
                 } else {

@@ -23,6 +23,8 @@
 		<link rel="stylesheet" href="/thesis/css/prompt-modification.css">
 		<link rel="stylesheet" href="/thesis/css/notification.css">
 		<link rel="stylesheet" href="/thesis/css/undo-redo.css">
+		<link rel="stylesheet" href="/thesis/css/setup.css">
+		<link rel="stylesheet" href="/thesis/css/task-setup.css">
 	</head>
 
 	<body class="theme">
@@ -99,6 +101,7 @@
 				<button id="undo" class="material-symbols-rounded" disabled title="undo"> undo </button>
 				<button id="redo" class="material-symbols-rounded" disabled title="redo"> redo </button>
 			</div>
+			<button id="start-task-btn">Start Task</button>
 		</div>
 
 		<img src="" alt="The generated image" id="output-image">
@@ -117,9 +120,42 @@
 			</div>
 		</div>
 
+		<div class="device-setup" id="setup_panel">
+		</div>
+
+		<!-- Task Setup Modal -->
+		<div id="task-modal" class="modal hidden">
+			<div class="modal-content">
+				<h2>Setup Task</h2>
+				<form id="task-setup-form">
+					<div class="input-group">
+						<label>Input Device:</label>
+						<div class="radio-group">
+							<label><input type="radio" name="input-device" value="Keyboard" checked><span
+										class="material-icons">keyboard</span> Keyboard</label>
+							<label><input type="radio" name="input-device" value="Macropad"><span
+										class="material-icons">dialpad</span> Macropad</label>
+						</div>
+					</div>
+					<div class="input-group">
+						<label for="user-name">User Name:</label>
+						<input type="text" id="user-name" name="user-name" required>
+					</div>
+					<div class="input-group">
+						<label for="image-id">Image ID:</label>
+						<input type="text" id="image-id" name="image-id" required>
+					</div>
+					<div class="input-group">
+						<button type="submit" id="modal-start-task">Start Task</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<!---------------- Scripts ---------------->
 		<!-- Only include the main application script which imports all needed modules -->
 		<script type="module" src="/thesis/js/app.js"></script>
+		<script type="module" src="/thesis/js/task-setup.js"></script>
 
 		<script>
 			document.getElementById("new-seed")

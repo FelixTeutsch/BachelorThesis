@@ -109,7 +109,6 @@ class InputHandler {
             if (event.altKey) {
                 event.preventDefault();
                 event.stopPropagation();
-                console.log('Custom Alt+Key handler triggered:', event.code);
                 const handler = this.keyBindings.get(event.code);
                 if (handler) {
                     handler(event);
@@ -132,7 +131,6 @@ class InputHandler {
     initialize() {
         // Add event listener to document
         document.addEventListener('keydown', (event) => {
-            console.log('keydown event:', { key: event.key, code: event.code, altKey: event.altKey, target: event.target });
             this.handleKeyPress(event);
         });
     }

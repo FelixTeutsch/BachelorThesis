@@ -199,14 +199,15 @@ import { addEntry } from './utils/history.js';
 
     // Function to handle workflow generation
     async function handleWorkflowGeneration() {
+
         // First save and cache the current values
         saveInputValues();
         cacheInputValues();
 
         // Get the actual prompt values from the elements
-        const prompt1 = document.getElementById('prompt-1').value.trim();
-        const prompt2 = document.getElementById('prompt-2').value.trim();
-        const prompt3 = document.getElementById('prompt-3').value.trim();
+        const prompt1 = fixWeights(document.getElementById('prompt-1'));
+        const prompt2 = fixWeights(document.getElementById('prompt-2'));
+        const prompt3 = fixWeights(document.getElementById('prompt-3'));
         const seed = inputValues['seed'].cache;
 
         console.log('Getting prompt values:', { prompt1, prompt2, prompt3, seed });
@@ -279,6 +280,18 @@ import { addEntry } from './utils/history.js';
         });
     }
 
+    function fixWeights(ref) {
+        console.log("Fixing field:", ref);
+        console.log("Input: ", ref);
+        let result = ref.value.trim();
+        if (!result || result === null)
+            return 0;
+        result = Math.max(result, ref.min);
+        result = Math.min(result, ref.max);
+        ref.value = result;
+        return result;
+    }
+
     // Initialize the input handler
     const inputHandler = new InputHandler();
     inputHandler.initialize();
@@ -336,9 +349,7 @@ import { addEntry } from './utils/history.js';
                     updateProgress(value, max);
                 }
             } else if (message.type === 'executed' || message.type === 'execution_success') {
-                console.log(message);
                 if (message.data.node === "9") {
-                    console.log('Execution completed');
                     // Generation completed
                     finishProgress();
                     isQueueBusy = false;
@@ -384,7 +395,6 @@ import { addEntry } from './utils/history.js';
                 resetProgress();
             } else if (message.type === 'execution_cached') {
                 // Handle cached execution
-                console.log('Execution cached');
                 finishProgress(); // Ensure progress is finished for cached executions
             }
         } catch (error) {

@@ -42,8 +42,8 @@ function resetParameters() {
     const promptSelect = document.getElementById('prompt-select');
     promptSelect.selectedIndex = 0;
     // Model select
-    const modelSelect = document.getElementById('model');
-    modelSelect.selectedIndex = 0;
+    // const modelSelect = document.getElementById('model');
+    // modelSelect.selectedIndex = 0;
 }
 
 // Start Task

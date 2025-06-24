@@ -56,6 +56,10 @@
 	background-color: var(--c_primary);
 }
 
+.radio-element:hover:not(:has(input:checked)) {
+	opacity: 0.75;
+}
+
 .radio-element:has(input) {
 	background-color: var(--c_secondary);
 	border-radius: var(--br_medium);

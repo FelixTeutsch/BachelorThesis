@@ -19,7 +19,7 @@
 	background: var(--c_panel);
 	margin: auto;
 	padding: var(--s_panel_padding);
-	border-radius: var(--br_medium);
+	border-radius: var(--br_large);
 	box-shadow: var(--sh_panel);
 	min-width: 320px;
 	max-width: 90vw;
@@ -33,6 +33,11 @@
 	flex-direction: column;
 	gap: var(--s_label_gap);
 }
+
+.input-group * {
+	padding: 12px 16px;
+}
+
 .radio-group {
 	display: flex;
 	gap: 1.5rem;
@@ -46,6 +51,16 @@
 	font-family: var(--f_f_text);
 	color: var(--c_text);
 }
+
+.radio-element:has(input:checked) {
+	background-color: var(--c_primary);
+}
+
+.radio-element:has(input) {
+	background-color: var(--c_secondary);
+	border-radius: var(--br_medium);
+}
+
 #start-task-btn,
 #modal-start-task {
 	margin-top: 1.5rem;
